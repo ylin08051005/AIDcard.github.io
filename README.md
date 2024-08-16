@@ -22,8 +22,11 @@ cd ../..
 ```
 python Web_easy\backend\server.py
 ```
-開啟網頁，可以展示圖片
+開啟另外一個終端機執行以下指令。開啟網頁，可以展示圖片
 ```
+cd AIDcard.github.io
 node Web_easy\frontend\app.js
-
 ```
+
+進入此網址執行操作
+http://localhost:3000/index.html
