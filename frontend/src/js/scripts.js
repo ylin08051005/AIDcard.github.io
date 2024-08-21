@@ -3,6 +3,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const token = localStorage.getItem('token');
     // const userId = localStorage.getItem('userId'); // 確保 userId 被定義
     const userId = token ? JSON.parse(atob(token.split('.')[1])).userId : null;
+    
+    // 確保 userId 被存儲在 localStorage 中
+    if (userId) {
+        localStorage.setItem('userId', userId);
+    }
+    
     console.log("Token:", token);  // 用于调试
     console.log("UserId:", userId);  // 用于调试
 
@@ -106,6 +112,7 @@ document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
         // alert('登入成功');
         // window.location.href = 'index.html';  // 登入成功後跳轉到首頁
         localStorage.setItem('token', data.token); // 儲存 JWT
+        localStorage.setItem('userId', data.userId); // 儲存 userId
 
         console.log('Token stored:', localStorage.getItem('token'));
         console.log('UserId stored:', data.userId);
@@ -126,7 +133,11 @@ function logout() {
 // 加載測驗的函數
 async function loadQuiz() {
 
-    console.log('userId in localStorage:', localStorage.getItem('userId'));
+    const token = localStorage.getItem('token');
+    // const userId = token ? JSON.parse(atob(token.split('.')[1])).userId : null;
+    const userId = localStorage.getItem('userId');
+    console.log('userId in localStorage:', userId);
+    // console.log('userId in localStorage:', localStorage.getItem('userId'));
 
     try {
         const quizResponse = await fetch('/api/getQuizzes');
@@ -161,8 +172,8 @@ async function loadQuiz() {
         document.getElementById('quizForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const userId = localStorage.getItem('userId');
-            console.log('userId:', userId);  // 添加這行来檢查 userId
+            // const userId = localStorage.getItem('userId');
+            // console.log('userId:', userId);  // 添加這行来檢查 userId
 
             const selectedAnswers = quizzes.map((quiz, index) => {
                 const selectedOptions = [...document.querySelectorAll(`input[name="quizOption${index}"]:checked`)]
