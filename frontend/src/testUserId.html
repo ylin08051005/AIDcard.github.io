@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>測試 userId</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <h2>測試 userId</h2>
+    <p id="userIdDisplay"></p>
+
+    <script>
+        const userId = localStorage.getItem('userId');
+        document.getElementById('userIdDisplay').innerText = `userId: ${userId}`;
+    </script>
+</body>
+</html>
