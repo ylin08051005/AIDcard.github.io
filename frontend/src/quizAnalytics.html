@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>page_example</title>
+    <title>Quiz Analytics</title>
     <link rel="stylesheet" href="css/styles.css">
+    <!-- 引入 Chart.js 庫 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- 引入你的自定義 JavaScript 檔案 -->
+    <script src="js/quizAnalytics.js" defer></script>
 </head>
 <body>
     <header>
@@ -25,12 +29,16 @@
         </nav>
     </header>
 
-    <main>
-        <h1>Hi, this is the example html file, don't change this one, just copy this page.</h1>
-        <button onclick="alert('Contact Button 1 Clicked')">Contact Button 1</button>
-        <button onclick="alert('Contact Button 2 Clicked')">Contact Button 2</button>
-    </main>
+    <h1>測驗統計分析</h1>
 
-    <script src="js/scripts.js"></script>
+    <!-- 添加一個選擇測驗的下拉選單 -->
+    <label for="quizSelect">選擇要分析的測驗：</label>
+    <select id="quizSelect">
+        <option value="66bc81e6d0349810ae04f985">測驗 1</option>
+        <option value="66bc81e6d0349810ae04f987">測驗 2</option>
+        <!-- 可以根據需要添加更多選項 -->
+    </select>
+
+    <canvas id="myChart" width="400" height="400"></canvas>
 </body>
 </html>

@@ -1,18 +1,53 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>測驗</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li id="registerNav"><a href="register.html">Register</a></li>
+                <li id="loginNav"><a href="login.html">Login</a></li>
+                <li id="leaderboardNav"><a href="leaderboard.html">Leaderboard</a></li>
+                <li id="achievementsNav"><a href="achievements.html">Achievements</a></li>
+                <li id="quizNav"><a href="quiz.html">Take a Quiz</a></li>
+                <li><a href="page_1.html">Page1</a></li>
+                <li><a href="page_2.html">Page2</a></li>
+                <li><a href="page_example.html">page example</a></li>
+                <li><a href="quizAnalytics.html">quizAnalytics</a></li>
+                <li><a href="testUserId.html">testUserId</a></li>
+            </ul>
+        </nav>
+    </header>
+
     <h2>完成測驗以獲取積分</h2>
     <form id="quizForm">
-        <div id="quizContainer"></div>
+        <div id="quizContainer">
+            {{#each quizzes}}
+            <div class="quiz-item">
+                <h3>{{this.question}}</h3>
+                {{#each this.options}}
+                <label>
+                    <input type="{{#if (gt ../correctAnswer.length 1)}}checkbox{{else}}radio{{/if}}"
+                        name="quizOption{{@index}}" value="{{this}}" />
+                    {{this}}
+                </label><br />
+                {{/each}}
+                <input type="hidden" name="quizId" value="{{this._id}}">
+            </div>
+            {{/each}}
+        </div>
         <button type="submit">提交答案</button>
     </form>
 
     <script src="js/scripts.js"></script>
 </body>
+
 </html>
