@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>使用者註冊</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <h2>使用者註冊</h2>
+    <form id="registerForm">
+        <label for="username">使用者名稱：</label>
+        <input type="text" id="username" name="username" required><br><br>
+        
+        <label for="password">密碼：</label>
+        <input type="password" id="password" name="password" required><br><br>
+        
+        <label for="confirm_password">確認密碼：</label>
+        <input type="password" id="confirm_password" name="confirm_password" required><br><br>
+        
+        <input type="submit" value="註冊">
+    </form>
+    <button onclick="window.location.href='index.html';">Home</button>
+    
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+
+            if (password !== confirmPassword) {
+                alert('密碼和確認密碼不一致');
+                return;
+            }
+
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                alert('註冊成功');
+                window.location.href = '/login.html';
+            } else {
+                alert(data.msg || '註冊失敗');
+            }
+        });
+    </script>
+</body>
+</html>
