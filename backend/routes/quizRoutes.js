@@ -5,6 +5,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const Quiz = require('../models/quizModel');
 const AnswerRecord = require('../models/answerRecordModel');
+const User = require('../models/userModel'); // 確保已正確導入 User 模型
 
 // 創建測驗的路由
 router.post('/createQuiz', async (req, res) => {
@@ -95,8 +96,74 @@ router.post('/createQuiz', async (req, res) => {
 //     }
 // });
 
+// router.post('/submitQuiz', async (req, res) => {
+//     const { userId, selectedAnswers } = req.body;
+
+//     try {
+//         if (!userId) {
+//             console.log('userId is missing');
+//             return res.status(400).json({ msg: 'userId is missing or invalid' });
+//         }
+
+//         const user = await User.findById(userId);
+//         if (!user) {
+//             console.log('User not found for userId:', userId);
+//             return res.status(404).json({ msg: 'User not found' });
+//         }
+
+//         let totalCorrect = true;
+
+//         for (const answer of selectedAnswers) {
+//             const { quizId, selectedOptions } = answer;
+
+//             if (!quizId) {
+//                 console.log('quizId is missing');
+//                 return res.status(400).json({ msg: 'quizId is missing or invalid' });
+//             }
+
+//             const quiz = await Quiz.findById(quizId);
+//             if (!quiz) {
+//                 console.log('Quiz not found for quizId:', quizId);
+//                 return res.status(404).json({ msg: 'Quiz not found' });
+//             }
+
+//             const isCorrect = quiz.correctAnswer.length === selectedOptions.length &&
+//                 selectedOptions.every(option => quiz.correctAnswer.includes(option));
+
+//             const answerRecord = new AnswerRecord({
+//                 userId,
+//                 quizId,
+//                 selectedOptions,
+//                 isCorrect,
+//                 timestamp: new Date()
+//             });
+
+//             try {
+//                 await answerRecord.save();
+//                 console.log(`Answer record saved for quizId: ${quizId}`);
+//             } catch (saveError) {
+//                 console.log('Error saving answerRecord:', saveError);
+//                 return res.status(500).json({ msg: 'Failed to save answer record' });
+//             }
+
+//             totalCorrect = totalCorrect && isCorrect;
+//         }
+
+//         res.json({ isCorrect: totalCorrect, msg: totalCorrect ? '所有題目回答正確！' : '有些題目回答錯誤！' });
+
+//     } catch (err) {
+//         console.log('Error in submitQuiz route:', err);
+//         res.status(500).json({ msg: 'Server error', error: err.message });
+//     }
+// });
+
+
 router.post('/submitQuiz', async (req, res) => {
     const { userId, selectedAnswers } = req.body;
+
+    console.log('SubmitQuiz API called'); // 调试信息
+    console.log('Received userId:', userId); // 打印接收到的 userId
+    console.log('Received selectedAnswers:', selectedAnswers); // 打印接收到的 selectedAnswers
 
     try {
         if (!userId) {
@@ -104,11 +171,22 @@ router.post('/submitQuiz', async (req, res) => {
             return res.status(400).json({ msg: 'userId is missing or invalid' });
         }
 
+        // 檢查 userId 是否為有效的 ObjectId
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            console.log('Invalid userId:', userId);
+            return res.status(400).json({ msg: 'Invalid userId' });
+        }
+
+        // 确保 User 模型正确导入
+        console.log('Attempting to find user in the database...');
+        console.log('User model:', User); // 确保模型加载正确
         const user = await User.findById(userId);
         if (!user) {
             console.log('User not found for userId:', userId);
             return res.status(404).json({ msg: 'User not found' });
         }
+
+        console.log('User found:', user); // 打印找到的用户信息
 
         let totalCorrect = true;
 
@@ -120,11 +198,21 @@ router.post('/submitQuiz', async (req, res) => {
                 return res.status(400).json({ msg: 'quizId is missing or invalid' });
             }
 
+            // 檢查 quizId 是否為有效的 ObjectId
+            if (!mongoose.Types.ObjectId.isValid(quizId)) {
+                console.log('Invalid quizId:', quizId);
+                return res.status(400).json({ msg: 'Invalid quizId' });
+            }
+
+            // 确保 Quiz 模型正确查找
+            console.log('Attempting to find quiz in the database...');
             const quiz = await Quiz.findById(quizId);
             if (!quiz) {
                 console.log('Quiz not found for quizId:', quizId);
                 return res.status(404).json({ msg: 'Quiz not found' });
             }
+
+            console.log('Quiz found:', quiz); // 打印找到的测验信息
 
             const isCorrect = quiz.correctAnswer.length === selectedOptions.length &&
                 selectedOptions.every(option => quiz.correctAnswer.includes(option));
@@ -155,8 +243,6 @@ router.post('/submitQuiz', async (req, res) => {
         res.status(500).json({ msg: 'Server error', error: err.message });
     }
 });
-
-
 
 
 
