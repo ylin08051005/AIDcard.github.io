@@ -233,10 +233,19 @@ router.post('/submitQuiz', async (req, res) => {
                 return res.status(500).json({ msg: 'Failed to save answer record' });
             }
 
-            totalCorrect = totalCorrect && isCorrect;
+            // totalCorrect = totalCorrect && isCorrect;
+            if (isCorrect) {
+                totalCorrect += 1; // 每答对一题，积分加1分（根据实际情况修改）
+            }
         }
 
-        res.json({ isCorrect: totalCorrect, msg: totalCorrect ? '所有題目回答正確！' : '有些題目回答錯誤！' });
+        // 更新用户的积分
+        user.points += totalCorrect;
+        await user.save();
+        console.log(`Updated user points: ${user.points}`); // 确保积分已更新
+
+        res.json({ isCorrect: totalCorrect === selectedAnswers.length, msg: totalCorrect > 0 ? '积分已更新！' : '没有答对任何题目。' });
+        // res.json({ isCorrect: totalCorrect, msg: totalCorrect ? '所有題目回答正確！' : '有些題目回答錯誤！' });
 
     } catch (err) {
         console.log('Error in submitQuiz route:', err);
