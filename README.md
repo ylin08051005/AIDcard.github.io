@@ -1,3 +1,12 @@
+## 上傳專案資料夾的方式
+```
+1. cd path/to/your/folder
+2. git init
+3. git add .
+4. git commit -m "Initial commit
+5. git push -u origin main
+```
+
 ## 複製專案
 
 ```
