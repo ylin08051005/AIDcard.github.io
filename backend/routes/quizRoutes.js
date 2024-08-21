@@ -260,9 +260,12 @@ router.get('/quizStats/:quizId', async (req, res) => {
     const { quizId } = req.params;
 
     try {
+        // 查询该 quizId 的总答题数
         const totalAttempts = await AnswerRecord.countDocuments({ quizId });
+        // 查询该 quizId 的正确答题数
         const correctAttempts = await AnswerRecord.countDocuments({ quizId, isCorrect: true });
 
+        // 计算答对率
         const correctPercentage = totalAttempts > 0 ? (correctAttempts / totalAttempts) * 100 : 0;
 
         res.json({
