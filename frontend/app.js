@@ -20,6 +20,9 @@ app.get('/register', (req, res) => {
     res.sendFile(path.join(__dirname, 'src', 'register.html'));
 });
 
+app.get('/image_predict', (req, res) => {
+    res.sendFile(path.join(__dirname, 'src', 'image_predict.html'));
+});
 
 for (let i = 1; i <= 10; i++) {
     app.get(`/page_${i}`, (req, res) => {
@@ -34,6 +37,5 @@ app.get(`/page_example`, (req, res) => {
 // 啟動伺服器
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    // console.log(`Server is running on http://localhost:${PORT}`);
     console.log(`Server is running on http://localhost:${PORT}/index.html`);
 });
