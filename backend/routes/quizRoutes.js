@@ -258,8 +258,21 @@ router.post('/submitQuiz', async (req, res) => {
 // 獲取每個測驗的答對百分比
 router.get('/quizStats/:quizId', async (req, res) => {
     const { quizId } = req.params;
+    console.log(`Received quizId: ${quizId}`);  // 日誌
 
     try {
+        // 檢查 quizId 是否為有效的 ObjectId
+        if (!mongoose.Types.ObjectId.isValid(quizId)) {
+            return res.status(400).json({ msg: 'Invalid quizId' });
+        }
+
+        // 確認 quizId 在資料庫中是否存在
+        const quizExists = await Quiz.findById(quizId);
+        if (!quizExists) {
+            console.log(`Quiz with id ${quizId} does not exist in the database`);
+            return res.status(404).json({ msg: 'Quiz not found' });
+        }
+        
         // 查询该 quizId 的总答题数
         const totalAttempts = await AnswerRecord.countDocuments({ quizId });
         // 查询该 quizId 的正确答题数
@@ -290,5 +303,17 @@ router.get('/getQuizzes', async (req, res) => {
         res.status(500).send('伺服器錯誤');
     }
 });
+
+// 获取所有测验的ID和问题
+router.get('/getAllQuizzes', async (req, res) => {
+    try {
+        const quizzes = await Quiz.find({}, '_id question'); // 只获取ID和问题
+        res.json(quizzes);
+    } catch (err) {
+        console.error('Error fetching quizzes:', err.message);
+        res.status(500).send('伺服器錯誤');
+    }
+});
+
 
 module.exports = router;

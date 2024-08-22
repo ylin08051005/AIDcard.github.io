@@ -5,6 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>首頁</title>
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* 確保頁面內容可以垂直滾動 */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden; /* 防止水平滾動條 */
+            overflow-y: auto; /* 確保垂直滾動條可用 */
+        }
+
+        main {
+            padding: 20px;
+            min-height: 1000px; /* 假設內容會很多，設定一個足夠大的高度 */
+        }
+    </style>
 </head>
 <body>
     <header>

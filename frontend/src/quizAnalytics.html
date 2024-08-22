@@ -9,6 +9,35 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- 引入你的自定義 JavaScript 檔案 -->
     <script src="js/quizAnalytics.js" defer></script>
+
+    <style>
+        /* 自定義畫面布局，使圖表更美觀 */
+        .chart-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            height: 1500px; /* 設定足夠大的高度來啟用滾動 */
+        }
+
+        canvas {
+            max-width: 400px;
+            max-height: 400px;
+        }
+
+        /* 確保頁面內容可以垂直滾動 */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden; /* 防止水平滾動條 */
+            overflow-y: auto; /* 確保垂直滾動條可用 */
+        }
+
+        main {
+            padding: 20px;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -29,16 +58,16 @@
         </nav>
     </header>
 
-    <h1>測驗統計分析</h1>
-
-    <!-- 添加一個選擇測驗的下拉選單 -->
-    <label for="quizSelect">選擇要分析的測驗：</label>
-    <select id="quizSelect">
-        <option value="66bc81e6d0349810ae04f985">測驗 1</option>
-        <option value="66bc81e6d0349810ae04f987">測驗 2</option>
-        <!-- 可以根據需要添加更多選項 -->
-    </select>
-
-    <canvas id="myChart" width="400" height="400"></canvas>
+    <div class="container">
+        <h1>測驗統計分析</h1>
+        <label for="quizSelect">選擇要分析的測驗：</label>
+        <select id="quizSelect">
+            <option value="quiz1">測驗1</option>
+            <option value="quiz2">測驗2</option>
+            <!-- 這裡可以增加更多的測驗選項 -->
+        </select>
+        <canvas id="myChart"></canvas>
+    </div>
+    
 </body>
 </html>
