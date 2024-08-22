@@ -18,6 +18,9 @@ cd AIDcard.github.io
 https://drive.google.com/file/d/1JhLIOjlVwObElupBOCBrbdY0edNMgYQY/view?usp=sharing
 並且將其放置於 backend/classification_model 中。
 
+查看爬蟲產出的圖片: 
+https://drive.google.com/drive/u/0/folders/1HIoygEZd4SJUjBsbMcyo2UV16g3QcEI9
+
 ## 安裝需要的 module 
 npm install express
 
