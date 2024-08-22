@@ -1,4 +1,5 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from classification_model import predict
 import socket
 import os
 
@@ -51,7 +52,10 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                     self.send_header('Content-type', 'image/jpeg')  # 根据图片类型调整 MIME 类型
                     self.end_headers()
                     self.wfile.write(file.read())
+                
+                predict.predict_class(latest_file_path)
                 print(f"Sent image: {latest_file}")
+                print(latest_file_path)
             except ValueError:
                 self.send_response(404)
                 self.send_header('Access-Control-Allow-Origin', '*')
