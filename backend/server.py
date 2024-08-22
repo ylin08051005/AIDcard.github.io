@@ -21,7 +21,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         post_data = self.rfile.read(content_length)
 
         # 指定保存文件的資料夾路徑
-        save_directory = r"Web_easy\backend\received_imgs"# 替換為你想要保存文件的路徑
+        save_directory = r"backend\received_imgs"# 替換為你想要保存文件的路徑
         os.makedirs(save_directory, exist_ok=True)  # 如果資料夾不存在，則創建
 
         # 指定文件名稱（假設每次上傳保存為 received_image.jpg）
@@ -37,7 +37,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path == r'/check-new-image':
-            save_directory = r"Web_easy\backend\received_imgs"  # 确保这个路径是正确的，并且存在
+            save_directory = r"backend\received_imgs"  # 确保这个路径是正确的，并且存在
 
             try:
                 # 找最新的檔案
