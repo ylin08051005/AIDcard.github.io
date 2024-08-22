@@ -18,17 +18,13 @@ transform = transforms.Compose([
 ])
 
 class_name = ['cardboard', 'glass', 'metal', 'paper', 'plastic', 'trash']
-print(class_name)
 
 model = VGG16
 
 def predict_class(img_path):
     if not os.path.exists(img_path) :
-        print("這個路徑沒有圖片！")
+        print("這個路徑沒有圖片！辨識模型並沒有讀取到圖片！")
     img = Image.open(img_path).convert('RGB')
-    # plt.imshow(img)
-    # plt.axis('off')
-    # plt.show()
     input_tensor = transform(img)
     input_tensor = input_tensor.unsqueeze(0)
 
@@ -44,11 +40,12 @@ def predict_class(img_path):
         _, predicted_class = torch.max(prediction,1)
 
     predicted_class_name = class_name[predicted_class.item()]
-    print("這張圖的類別是：",predicted_class_name)
+    return predicted_class.item(), predicted_class_name
 
 
-predict_dir_path = r"backend\received_imgs"
-print(os.path.exists(predict_dir_path))
+if __name__ == "__main__" :
+    predict_dir_path = r"backend\received_imgs"
+    print(os.path.exists(predict_dir_path))
 
-img_path = r"backend\received_imgs\received_image.jpg"
-predict_class(img_path)
+    img_path = r"backend\received_imgs\received_image.jpg"
+    predict_class(img_path)
