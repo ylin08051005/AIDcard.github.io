@@ -39,11 +39,74 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(b'File received successfully')
 
+    # def do_GET(self):
+    #     print(f"Current working directory: {os.getcwd()}")
+        
+    #     if self.path == r'/check-new-image':
+    #         save_directory = r"backend\received_imgs"  # 确保这个路径是正确的，并且存在
+    #         print(f"Checking for files in: {os.path.abspath(save_directory)}")
+    #         os.makedirs(save_directory, exist_ok=True)  # 如果資料夾不存在，則創建
+
+    #         try:
+    #             # 確認資料夾中有文件
+    #             files = os.listdir(save_directory)
+    #             if not files:
+    #                 raise ValueError("No files found in directory")
+
+    #             # 找最新的檔案
+    #             latest_file = max([f for f in os.listdir(save_directory)], key=lambda x: os.path.getmtime(os.path.join(save_directory, x)))
+    #             latest_file_path = os.path.join(save_directory, latest_file)
+
+    #             # 使用 predict_class 函數取得分類結果
+    #             class_num, class_name = predict.predict_class(latest_file_path)
+
+    #             # 讀取並編碼圖片
+    #             with open(latest_file_path, 'rb') as image_file:
+    #                 encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
+
+    #             # 準備回傳的數據
+    #             response_data = {
+    #                 "file_name": latest_file,
+    #                 "class_name": class_name,
+    #                 "class_num": class_num,
+    #                 "image_data": encoded_image
+    #             }
+                
+    #             # 將數據轉換為 JSON 並返回
+    #             self.send_response(200)
+    #             self.send_header('Access-Control-Allow-Origin', '*')
+    #             self.send_header('Content-Type', 'application/json')
+    #             self.end_headers()
+    #             self.wfile.write(json.dumps(response_data).encode('utf-8'))
+
+    #         except ValueError as e:
+    #             print(f"Error: {e}")
+    #             self.send_response(404)
+    #             self.send_header('Access-Control-Allow-Origin', '*')
+    #             self.end_headers()
+    #             self.wfile.write(b'No files found')
+        
+    #     else:
+    #         self.send_response(404)
+    #         self.send_header('Access-Control-Allow-Origin', '*')
+    #         self.end_headers()
+    #         self.wfile.write(b'Path is wrong!')
+    
     def do_GET(self):
+        # 打印當前工作目錄
+        print(f"Current working directory: {os.getcwd()}")
+
         if self.path == r'/check-new-image':
-            save_directory = r"backend\received_imgs"  # 确保这个路径是正确的，并且存在
+            save_directory = r"backend\received_imgs"  # 確保这个路径是正确的，并且存在
+            print(f"Checking for files in: {os.path.abspath(save_directory)}")
+            os.makedirs(save_directory, exist_ok=True)  # 如果資料夾不存在，則創建
 
             try:
+                # 確認資料夾中有文件
+                files = os.listdir(save_directory)
+                if not files:
+                    raise ValueError("No files found in directory")
+
                 # 找最新的檔案
                 latest_file = max([f for f in os.listdir(save_directory)], key=lambda x: os.path.getmtime(os.path.join(save_directory, x)))
                 latest_file_path = os.path.join(save_directory, latest_file)
@@ -62,7 +125,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                     "class_num": class_num,
                     "image_data": encoded_image
                 }
-                
+
                 # 將數據轉換為 JSON 並返回
                 self.send_response(200)
                 self.send_header('Access-Control-Allow-Origin', '*')
@@ -70,16 +133,37 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps(response_data).encode('utf-8'))
 
-            except ValueError:
+            except ValueError as e:
+                print(f"Error: {e}")
                 self.send_response(404)
                 self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
                 self.wfile.write(b'No files found')
+
+        elif self.path == r'/received_image.jpg':
+            # 處理圖片的請求
+            save_directory = r"backend\received_imgs"
+            file_path = os.path.join(save_directory, "received_image.jpg")
+            
+            if os.path.exists(file_path):
+                self.send_response(200)
+                self.send_header('Content-type', 'image/jpeg')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                with open(file_path, 'rb') as file:
+                    self.wfile.write(file.read())
+            else:
+                self.send_response(404)
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(b'File not found')
+
         else:
             self.send_response(404)
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
             self.wfile.write(b'Path is wrong!')
+
 
 def run(server_class=HTTPServer, handler_class=SimpleHTTPRequestHandler, port=8080):
     server_address = ('', port)

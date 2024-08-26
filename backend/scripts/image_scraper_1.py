@@ -11,7 +11,7 @@ import os # 用來處理檔案路徑和創建資料夾
 nest_asyncio.apply()
 
 async def fetch_image_urls(query, max_links_to_fetch):
-    browser = await launch(executablePath='C:\\Program Files\\Google\\Chrome\\Application\\new_chrome.exe', headless=True, args=['--no-sandbox'])
+    browser = await launch(executablePath='C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', headless=True, args=['--no-sandbox'])
     try:
         page = await browser.newPage()
         search_url = f"https://www.google.com/search?q={query}&tbm=isch"
@@ -50,6 +50,11 @@ def save_images(image_urls, folder_path):
             # 將圖片轉換為 RGB 模式，這樣可以保存為 JPEG
             if image.mode in ("P", "RGBA"):
                 image = image.convert("RGB")
+                
+            # 篩選尺寸
+            if image.width < 200 or image.height < 200:
+                print(f"Skipped {url} due to small size: {image.size}")
+                continue
             
             image_path = os.path.join(folder_path, f'image_{i+1}.jpg')
             image.save(image_path)
@@ -59,8 +64,8 @@ def save_images(image_urls, folder_path):
 
 def main():
     query = "paper recycling"
-    max_images = 1000
-    folder_path = "紙類_images"  # 設置圖片保存的文件夾路徑
+    max_images = 20
+    folder_path = "紙類_images_1"  # 設置圖片保存的文件夾路徑
 
     print("Fetching image URLs...")
     image_urls = asyncio.get_event_loop().run_until_complete(fetch_image_urls(query, max_images))
