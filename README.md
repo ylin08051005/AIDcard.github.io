@@ -3,7 +3,7 @@
 1. cd path/to/your/folder
 2. git init
 3. git add .
-4. git commit -m "Initial commit
+4. git commit -m "Initial commit"
 5. git push -u origin main
 ```
 
@@ -18,8 +18,10 @@ cd AIDcard.github.io
 https://drive.google.com/file/d/1JhLIOjlVwObElupBOCBrbdY0edNMgYQY/view?usp=sharing
 並且將其放置於 backend/classification_model 中。
 
+查看爬蟲產出的圖片: 
+https://drive.google.com/drive/u/0/folders/1HIoygEZd4SJUjBsbMcyo2UV16g3QcEI9
+
 ## 安裝需要的 module 
-npm install express
 
 開啟 server 端，可以傳送圖片
 
@@ -29,6 +31,7 @@ python backend\server.py
 開啟另外一個終端機執行以下指令。開啟網頁，可以展示圖片
 ```
 cd AIDcard.github.io
+npm install express
 node frontend\app.js
 ```
 

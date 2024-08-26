@@ -4,6 +4,6 @@ package-lock.json
 package.json
 
 backend/classification_model/__pycache__
-backend/received_imgs
+# backend/received_imgs
 
 backend/classification_model/model_weights.pth
