@@ -17,5 +17,13 @@ def receive_images():
 
     return jsonify({"message": "Images received successfully", "count": len(image_urls)})
 
+@main.route('/')
+def home():
+    return render_template('index.html')
+
+@main.route('/Gemini_connect') 
+def new_page():
+    return render_template('Gemini_connect.html')
+    
 if __name__ == '__main__':
     app.run(port=5000)
