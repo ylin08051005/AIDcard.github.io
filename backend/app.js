@@ -165,6 +165,25 @@ app.post('/updateProfile', async (req, res) => {
     }
 });
 
+//Gemini路徑添加
+document.addEventListener('DOMContentLoaded', function() {
+    const links = document.querySelectorAll('nav a');
+    links.forEach(link => {
+        link.addEventListener('click', function(event) {
+            event.preventDefault();
+            const url = this.getAttribute('href');
+            fetch(url)
+                .then(response => response.text())
+                .then(data => {
+                    document.body.innerHTML = data;
+                });
+        });
+    });
+});
+
+
+
+
 // 中間件的定義
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
