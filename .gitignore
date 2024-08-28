@@ -8,5 +8,6 @@ backend/classification_model/__pycache__
 
 backend/classification_model/model_weights.pth
 
-# backend/myenv/Lib/site-packages/torch/lib/torch_cpu.dll
-# backend/myenv/Lib/site-packages/torch/lib/dnnl.lib
+backend/myenv/Lib/site-packages/torch/lib/torch_cpu.dll
+backend/myenv/Lib/site-packages/torch/lib/dnnl.lib
+backend/scripts/myenv/Lib/site-packages/cv2/cv2.pyd
