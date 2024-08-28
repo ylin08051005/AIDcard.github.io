@@ -7,3 +7,6 @@ backend/classification_model/__pycache__
 # backend/received_imgs
 
 backend/classification_model/model_weights.pth
+
+# backend/myenv/Lib/site-packages/torch/lib/torch_cpu.dll
+# backend/myenv/Lib/site-packages/torch/lib/dnnl.lib

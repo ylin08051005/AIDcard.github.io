@@ -22,6 +22,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const leaderboardNav = document.getElementById('leaderboardNav');
     const achievementsNav = document.getElementById('achievementsNav');
     const quizNav = document.getElementById('quizNav');
+    const quizAnalyticsNav = document.getElementById('quizAnalyticsNav');
+    const GeminiNav = document.getElementById('GeminiNav');
 
     
     if (token && userId) {
@@ -36,6 +38,9 @@ document.addEventListener('DOMContentLoaded', function () {
         if (leaderboardNav) leaderboardNav.style.display = 'block'; // 顯示排行榜連結
         if (achievementsNav) achievementsNav.style.display = 'block'; // 顯示成就連結
         if (quizNav) quizNav.style.display = 'block'; // 顯示成就連結
+        if (quizAnalyticsNav) quizAnalyticsNav.style.display = 'block';
+        if (GeminiNav) GeminiNav.style.display = 'block';
+
     } else {
         console.log("User is not logged in.");  // 用于调试
         if (loginBtn) loginBtn.style.display = 'block';
@@ -48,6 +53,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (leaderboardNav) leaderboardNav.style.display = 'none'; // 隱藏排行榜連結
         if (achievementsNav) achievementsNav.style.display = 'none'; // 隱藏成就連結
         if (quizNav) quizNav.style.display = 'none'; // 顯示成就連結
+        if (quizAnalyticsNav) quizAnalyticsNav.style.display = 'none';
+        if (GeminiNav) GeminiNav.style.display = 'none';
     }
 
     // 如果是在quiz.html頁面，則加載測驗題目
