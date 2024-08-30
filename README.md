@@ -1,10 +1,9 @@
 ## 上傳專案資料夾的方式
 ```
 1. cd path/to/your/folder
-2. git init
-3. git add .
-4. git commit -m "Initial commit"
-5. git push -u origin main
+2. git add .
+3. git commit -m "Initial commit"
+4. git push -u origin main
 ```
 
 ## 複製專案
@@ -63,6 +62,10 @@ https://github.com/AgaMiko/waste-datasets-review
 * 有沒有可能用 generative AI, 生成垃圾圖片?
 
 # 詠琪
+20240828
+1. 將專案套入模板中。
+2. Todo list 中的資料分析敘述優化。(請看下方)
+
 20240825
 1. 爬蟲圖片品質提升。不過一般垃圾的圖片品質依然無法解決。
 2. Image Predict 路徑問題解決。
