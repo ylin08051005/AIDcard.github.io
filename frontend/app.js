@@ -9,7 +9,7 @@ app.use(express.static(path.join(__dirname, 'src')));
 
 // 根路由對應 'index.html'
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'src', 'index.html'));
+    res.sendFile(path.join(__dirname, 'src', 'index_new.html'));
 });
 
 app.get('/login', (req, res) => {
@@ -37,5 +37,5 @@ app.get(`/page_example`, (req, res) => {
 // 啟動伺服器
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}/index.html`);
+    console.log(`Server is running on http://localhost:${PORT}/index_new.html`);
 });

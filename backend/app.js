@@ -1,20 +1,38 @@
+// backend/app.js
 const express = require('express');
+const router = express.Router();
 const mongoose = require('mongoose');
-const authRoutes = require('./routes/authRoutes');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('./models/userModel'); // 引入userModel
+const Achievement = require('./models/achievementModel');
 const path = require('path'); // 新增這一行
 const achievementRoutes = require('./routes/achievementRoutes');
 const quizRoutes = require('./routes/quizRoutes');
+const { router: authRoutes, authMiddleware } = require('./routes/authRoutes');
 
 const app = express();
 
 // 解析 JSON 請求
 app.use(express.json());
 // 使用路由
+console.log('Before mounting achievements route');
 app.use('/api/achievements', achievementRoutes);
+console.log('After mounting achievements route');
+
 app.use('/api/auth', authRoutes); // 使用 /api/auth 路由
+app.use('/api', quizRoutes);
+
+console.log("Quiz routes are set up");
+
+
+// 設定靜態文件路徑，指向 'frontend/src' 目錄
+app.use(express.static(path.join(__dirname, '../frontend/src'))); 
+
+// 處理根路徑的 GET 請求
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/src', 'index_new.html')); 
+});
 
 // 資料庫連接
 mongoose.connect('mongodb://localhost:27017/web_easy', { useNewUrlParser: true, useUnifiedTopology: true })
@@ -126,14 +144,18 @@ app.post('/completeDailyChallenge', async (req, res) => {
 
 app.post('/unlockAchievement', async (req, res) => {
     const { userId, achievementId } = req.body;
-    
+
+    console.log(`userId: ${userId}, achievementId: ${achievementId}`);  // 新增日誌
+
     try {
         let user = await User.findById(userId);
         let achievement = await Achievement.findById(achievementId);
-        
+
         if (user && achievement) {
             user.points += achievement.points; // 增加成就獎勵的積分
-            // 假設用戶模型中有一個字段來儲存已解鎖的成就ID列表
+            if (!user.achievements) {
+                user.achievements = [];
+            }
             user.achievements.push(achievementId);
             await user.save();
             return res.json({ msg: '成就解鎖', points: user.points });
@@ -145,6 +167,7 @@ app.post('/unlockAchievement', async (req, res) => {
         res.status(500).send('Server error');
     }
 });
+
 
 app.post('/updateProfile', async (req, res) => {
     const { userId, profileData } = req.body;
@@ -178,19 +201,6 @@ function authenticateToken(req, res, next) {
         next(); // 調用 next() 進入下一個中間件或路由處理程序
     });
 }
-
-app.use('/api', quizRoutes);
-
-console.log("Quiz routes are set up");
-
-
-// 設定靜態文件路徑，指向 'frontend/src' 目錄
-app.use(express.static(path.join(__dirname, '../frontend/src'))); 
-
-// 處理根路徑的 GET 請求
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/src', 'index.html')); 
-});
 
 // // 測試路由
 // app.get('/test', (req, res) => {

@@ -1,3 +1,4 @@
+<!-- frontend/src/quizAnalytics.html -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -12,7 +13,7 @@
     <title>Quiz Analytics</title>
 
     <!-- Favicon -->
-    <link rel="icon" href="img/core-img/favicon.ico">
+    <link rel="icon" href="assets/img/core-img/favicon.ico">
 
     <!-- Style CSS -->
     <link rel="stylesheet" href="style.css">
@@ -25,6 +26,15 @@
 <body>
     <h2>Quiz</h2>
     <ul id="quizAnalytics"></ul>
+
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index_new.html">Home</a></li>
+                <li><a href="quizAnalytics.html">Quiz Analytics</a></li>
+            </ul>
+        </nav>
+    </header>
 
     <!-- Preloader -->
     <div id="preloader">
@@ -67,9 +77,9 @@
                                 <ul>
                                     <li><a href="#">Hello World!</a></li>
                                     <li><a href="#">Hello Universe!</a></li>
-                                    <li><a href="#">Hello Original!</a></li>
+                                    <li><a href="#">Hello Green!</a></li>
                                     <li><a href="#">Hello Earth!</a></li>
-                                    <li><a href="#">Hello Colorlib!</a></li>
+                                    <li><a href="#">Hello NCCUTrash!</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -239,6 +249,25 @@
     </header>
     <!-- ##### Header Area End ##### -->
 
+    <main>
+        <h2>成就列表</h2>
+        <ul id="achievementList"></ul>
+
+        <h1>資料分析選單</h1>
+        <select id="analysisType">
+            <option value="quizResults">測驗結果分析</option>
+            <option value="userParticipation">用戶參與度追蹤</option>
+            <option value="timePerformance">測驗時間與表現分析</option>
+            <option value="completionTimeDistribution">測驗完成時間分佈</option>
+            <option value="cnnAccuracy">CNN準確率分析</option>
+            <option value="userProgress">用戶學習進步追蹤</option>
+        </select>
+
+        <div class="chart-container">
+            <canvas id="analysisChart"></canvas>
+        </div>
+    </main>
+
     <div class="container">
         <h1>測驗統計分析</h1>
         <label for="quizSelect">選擇要分析的測驗：</label>
@@ -330,21 +359,49 @@
     <!-- Active js -->
     <script src="js/active.js"></script>
 
-    <!-- <script src="js/scripts.js"></script> -->
+    <script src="js/scripts.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', async function () {
-            const response = await fetch('/api/achievements/unlockAchievement');
-            const achievements = await response.json();
-            const achievementList = document.getElementById('achievementList');
+            try {
+                const response = await fetch('/api/achievements');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch achievements');
+                }
+                const achievements = await response.json();
+                const achievementList = document.getElementById('achievementList');
 
-            achievements.forEach(achievement => {
-                const listItem = document.createElement('li');
-                listItem.textContent = `${achievement.name} - ${achievement.description} - 獎勵: ${achievement.points} 分`;
-                achievementList.appendChild(listItem);
-            });
+                // 確保 achievementList 存在
+                if (!achievementList) {
+                    console.error('achievementList 元素未找到，無法顯示成就列表');
+                    return;
+                }
+
+                // 檢查 achievements 是否為陣列
+                if (Array.isArray(achievements)) {
+                    achievements.forEach(achievement => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `${achievement.name} - ${achievement.description} - 獎勵: ${achievement.points} 分`;
+                        achievementList.appendChild(listItem);
+                    });
+                } else {
+                    console.error('achievements 不是一個陣列:', achievements);
+                    const listItem = document.createElement('li');
+                    listItem.textContent = '未能獲取成就列表';
+                    achievementList.appendChild(listItem);
+                }
+            } catch (error) {
+                console.error('獲取成就時發生錯誤:', error);
+                const achievementList = document.getElementById('achievementList');
+                if (achievementList) {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = '無法加載成就列表，請稍後再試。';
+                    achievementList.appendChild(listItem);
+                }
+            }
         });
     </script>
+
 </body>
 
 </html>

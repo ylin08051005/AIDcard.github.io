@@ -24,9 +24,14 @@ model = VGG16
 def predict_class(img_path):
     if not os.path.exists(img_path) :
         print("這個路徑沒有圖片！辨識模型並沒有讀取到圖片！")
+        return
+    
     img = Image.open(img_path).convert('RGB')
     input_tensor = transform(img)
     input_tensor = input_tensor.unsqueeze(0)
+    
+    # 加載模型權重
+    model.load_state_dict(torch.load('classification_model/model_weights.pth'))
 
     model.eval()
 

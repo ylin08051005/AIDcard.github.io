@@ -125,7 +125,7 @@ document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
         console.log('UserId stored:', data.userId);
 
         alert('登入成功');
-        window.location.href = 'index.html';  // 登入成功後跳轉到首頁
+        window.location.href = 'index_new.html';  // 登入成功後跳轉到首頁
     } else {
         alert(data.message);
     }
@@ -134,7 +134,7 @@ document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
 function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
-    window.location.href = 'index.html';
+    window.location.href = 'index_new.html';
 }
 
 // 加載測驗的函數

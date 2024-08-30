@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const Quiz = require('../models/quizModel');
 const AnswerRecord = require('../models/answerRecordModel');
 const User = require('../models/userModel'); // 確保已正確導入 User 模型
+const QuizResult = require('../models/QuizResult');
 
 // 創建測驗的路由
 router.post('/createQuiz', async (req, res) => {
@@ -23,140 +24,6 @@ router.post('/createQuiz', async (req, res) => {
         res.status(500).send('Server error');
     }
 });
-
-// 用戶提交測驗答案
-// router.post('/submitQuiz', async (req, res) => {
-//     const { userId, selectedAnswers } = req.body;
-
-//     // 1. 檢查 userId 是否有效
-//     if (!mongoose.Types.ObjectId.isValid(userId)) {
-//         return res.status(400).json({ msg: '無效的 userId' });
-//     }
-
-//     const userObjectId = new mongoose.Types.ObjectId(userId); // 確保 userId 正確生成 ObjectId
-
-//     // 檢查 userId 是否在資料庫中存在
-//     const user = await User.findById(userObjectId);
-//     if (!user) {
-//         return res.status(404).json({ msg: '用戶未找到' });
-//     }
-
-//     console.log('Received userId:', userId);
-//     console.log('Received selectedAnswers:', selectedAnswers);
-
-//     try {
-//         let totalCorrect = true;
-        
-//         for (const answer of selectedAnswers) {
-//             const { quizId, selectedOptions } = answer;
-
-//             // 2. 檢查 quizId 是否有效
-//             if (!mongoose.Types.ObjectId.isValid(quizId)) {
-//                 console.error('Invalid quizId:', quizId);
-//                 return res.status(400).json({ msg: 'Invalid quizId' });
-//             }
-
-//             // 使用 new 關鍵字來實例化 ObjectId
-//             const objectId = new mongoose.Types.ObjectId(quizId);
-//             console.log('Generated ObjectId:', objectId); // 確認它是否正確生成
-
-//             // 檢查 quizId 是否在資料庫中存在
-//             const quiz = await Quiz.findById(objectId);
-//             if (!quiz) {
-//                 return res.status(404).json({ msg: '測驗未找到' });
-//             }
-
-//             // 核對答案是否正確
-//             const isCorrect = quiz.correctAnswer.length === selectedOptions.length &&
-//                 selectedOptions.every(option => quiz.correctAnswer.includes(option));
-            
-//             totalCorrect = totalCorrect && isCorrect;
-
-//             // 保存答題記錄
-//             const answerRecord = new AnswerRecord({
-//                 userId: userObjectId, // 使用轉換後的 ObjectId
-//                 quizId: objectId,  // 使用 ObjectId
-//                 selectedOptions,
-//                 isCorrect
-//             });
-
-//         try {
-//             await answerRecord.save();
-//             console.log(`Answer for quiz ${quizId} saved successfully.`);
-//         } catch (saveError) {
-//             console.error(`Error saving answer for quiz ${quizId}:`, saveError);
-//             return res.status(500).json({ msg: '保存答題記錄時發生錯誤' });
-//         }
-//     }
-
-//         res.json({ isCorrect: totalCorrect, msg: totalCorrect ? '所有題目回答正確！' : '有些題目回答錯誤！' });
-//     } catch (err) {
-//         console.error('Error during quiz submission:', err);
-//         res.status(500).send('Server error');
-//     }
-// });
-
-// router.post('/submitQuiz', async (req, res) => {
-//     const { userId, selectedAnswers } = req.body;
-
-//     try {
-//         if (!userId) {
-//             console.log('userId is missing');
-//             return res.status(400).json({ msg: 'userId is missing or invalid' });
-//         }
-
-//         const user = await User.findById(userId);
-//         if (!user) {
-//             console.log('User not found for userId:', userId);
-//             return res.status(404).json({ msg: 'User not found' });
-//         }
-
-//         let totalCorrect = true;
-
-//         for (const answer of selectedAnswers) {
-//             const { quizId, selectedOptions } = answer;
-
-//             if (!quizId) {
-//                 console.log('quizId is missing');
-//                 return res.status(400).json({ msg: 'quizId is missing or invalid' });
-//             }
-
-//             const quiz = await Quiz.findById(quizId);
-//             if (!quiz) {
-//                 console.log('Quiz not found for quizId:', quizId);
-//                 return res.status(404).json({ msg: 'Quiz not found' });
-//             }
-
-//             const isCorrect = quiz.correctAnswer.length === selectedOptions.length &&
-//                 selectedOptions.every(option => quiz.correctAnswer.includes(option));
-
-//             const answerRecord = new AnswerRecord({
-//                 userId,
-//                 quizId,
-//                 selectedOptions,
-//                 isCorrect,
-//                 timestamp: new Date()
-//             });
-
-//             try {
-//                 await answerRecord.save();
-//                 console.log(`Answer record saved for quizId: ${quizId}`);
-//             } catch (saveError) {
-//                 console.log('Error saving answerRecord:', saveError);
-//                 return res.status(500).json({ msg: 'Failed to save answer record' });
-//             }
-
-//             totalCorrect = totalCorrect && isCorrect;
-//         }
-
-//         res.json({ isCorrect: totalCorrect, msg: totalCorrect ? '所有題目回答正確！' : '有些題目回答錯誤！' });
-
-//     } catch (err) {
-//         console.log('Error in submitQuiz route:', err);
-//         res.status(500).json({ msg: 'Server error', error: err.message });
-//     }
-// });
-
 
 router.post('/submitQuiz', async (req, res) => {
     const { userId, selectedAnswers } = req.body;
@@ -314,6 +181,89 @@ router.get('/getAllQuizzes', async (req, res) => {
         res.status(500).send('伺服器錯誤');
     }
 });
+
+// 測驗結果分析
+router.get('/quizResults', async (req, res) => {
+    try {
+        const results = await QuizResult.find().populate('quizId userId');
+        res.json(results);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch quiz results' });
+    }
+});
+
+// 用戶參與度追蹤
+router.get('/userParticipation', async (req, res) => {
+    try {
+        const participation = await QuizResult.aggregate([
+            { $group: { _id: "$userId", participationCount: { $sum: 1 } } },
+            { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'user' } },
+            { $unwind: '$user' },
+            { $project: { _id: 0, username: '$user.username', participationCount: 1 } }
+        ]);
+        res.json(participation);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch user participation data' });
+    }
+});
+
+// 測驗時間與表現分析
+router.get('/timePerformance', async (req, res) => {
+    try {
+        const performance = await QuizResult.aggregate([
+            { $group: { _id: "$quizId", averageTime: { $avg: "$timeSpent" }, averageScore: { $avg: "$score" } } },
+            { $lookup: { from: 'quizzes', localField: '_id', foreignField: '_id', as: 'quiz' } },
+            { $unwind: '$quiz' },
+            { $project: { _id: 0, quizName: '$quiz.question', averageTime: 1, averageScore: 1 } }
+        ]);
+        res.json(performance);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch time and performance data' });
+    }
+});
+
+// 測驗完成時間分佈
+router.get('/completionTimeDistribution', async (req, res) => {
+    try {
+        const completionTimes = await QuizResult.aggregate([
+            { $bucket: {
+                groupBy: "$timeSpent",
+                boundaries: [0, 60, 120, 180, 240, 300, 600, 1200],
+                default: "Other",
+                output: { count: { $sum: 1 } }
+            }}
+        ]);
+        res.json(completionTimes);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch completion time distribution' });
+    }
+});
+
+// CNN準確率分析（假設你有一個單獨的模型來存放CNN的準確率數據）
+router.get('/cnnAccuracy', async (req, res) => {
+    try {
+        const accuracyData = await CNNAccuracyModel.find().sort({ timestamp: 1 });
+        res.json(accuracyData);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch CNN accuracy data' });
+    }
+});
+
+// 用戶學習進步追蹤
+router.get('/userProgress', async (req, res) => {
+    try {
+        const progress = await QuizResult.aggregate([
+            { $group: { _id: "$userId", scores: { $push: "$score" }, timestamps: { $push: "$completionTime" } } },
+            { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'user' } },
+            { $unwind: '$user' },
+            { $project: { _id: 0, username: '$user.username', scores: 1, timestamps: 1 } }
+        ]);
+        res.json(progress);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch user progress data' });
+    }
+});
+
 
 
 module.exports = router;
