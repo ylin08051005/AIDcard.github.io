@@ -1,4 +1,70 @@
 // frontend/src/js/quizAnalytics.js
+// document.addEventListener('DOMContentLoaded', async function () {
+//     try {
+//         // 獲取所有的測驗ID
+//         const quizResponse = await fetch('/api/getAllQuizzes');
+//         const quizzes = await quizResponse.json();
+
+//         const quizSelect = document.getElementById('quizSelect');
+
+//         // 清空並填充測驗選項
+//         quizSelect.innerHTML = '';
+//         quizzes.forEach(quiz => {
+//             const option = document.createElement('option');
+//             option.value = quiz._id;
+//             option.textContent = quiz.question;
+//             quizSelect.appendChild(option);
+//         });
+
+//         // 取得當前選擇的測驗ID
+//         let quizId = quizSelect.value;
+//         let analysisType = document.getElementById('analysisType').value;
+
+//         // 當使用者更改選單或分析類型時，更新圖表
+//         quizSelect.addEventListener('change', async function () {
+//             quizId = quizSelect.value;
+//             await updateChart(quizId, analysisType);
+//         });
+
+//         document.getElementById('analysisType').addEventListener('change', async function () {
+//             analysisType = this.value;
+//             await updateChart(quizId, analysisType);
+//         });
+
+//         // 初始化圖表，顯示第一個測驗的數據
+//         await updateChart(quizId, analysisType);
+
+//          // 如果未定義 lotteryButton，則定義並添加抽獎按鈕
+//          let lotteryButton = document.getElementById('lotteryButton');
+//          if (!lotteryButton) {
+//              lotteryButton = document.createElement('button');
+//              lotteryButton.id = 'lotteryButton';
+//              lotteryButton.textContent = '參加抽獎';
+//              document.body.appendChild(lotteryButton);
+//          }
+
+//         // 設置抽獎按鈕
+//         lotteryButton.addEventListener('click', async () => {
+//             const token = localStorage.getItem('token');  // 獲取 token
+//             try {
+//                 const response = await fetch('/api/lottery', {
+//                     method: 'POST',
+//                     headers: {
+//                         'Authorization': `Bearer ${token}`
+//                     }
+//                 });
+
+//                 if (!response.ok) {
+//                     throw new Error(`Failed to participate in lottery: ${response.statusText}`);
+//                 }
+
+//                 const data = await response.json();
+//                 alert(`恭喜你！你獲得了${data.msg}`);
+//             } catch (error) {
+//                 console.error('Error:', error);
+//                 alert(`抽獎失敗: ${error.message}`);
+//             }
+//         });
 document.addEventListener('DOMContentLoaded', async function () {
     try {
         // 獲取所有的測驗ID
@@ -33,6 +99,39 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         // 初始化圖表，顯示第一個測驗的數據
         await updateChart(quizId, analysisType);
+
+        // 如果未定義 lotteryButton，則定義並添加抽獎按鈕
+        let lotteryButton = document.getElementById('lotteryButton');
+        if (!lotteryButton) {
+            lotteryButton = document.createElement('button');
+            lotteryButton.id = 'lotteryButton';
+            lotteryButton.textContent = '參加抽獎';
+            document.body.appendChild(lotteryButton);
+        }
+
+        // 設置抽獎按鈕
+        lotteryButton.addEventListener('click', async () => {
+            const token = localStorage.getItem('token');  // 獲取 token
+            try {
+                const response = await fetch('/api/lottery', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to participate in lottery: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                alert(`恭喜你！你獲得了${data.msg}`);
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`抽獎失敗: ${error.message}`);
+            }
+        });
+
     } catch (error) {
         console.error('Error:', error);
         alert('無法加載測驗列表，請稍後再試。');
@@ -40,6 +139,12 @@ document.addEventListener('DOMContentLoaded', async function () {
 });
 
 let myChart = null; // 在全局範圍內定義一個變量來保存圖表實例
+
+// 添加一個抽獎按鈕
+const lotteryButton = document.createElement('button');
+lotteryButton.id = 'lotteryButton';
+lotteryButton.textContent = '參加抽獎';
+document.body.appendChild(lotteryButton);
 
 async function updateChart(quizId, analysisType) {
     try {
@@ -221,7 +326,7 @@ async function updateChart(quizId, analysisType) {
             body: JSON.stringify({
                 userId: localStorage.getItem('userId'), // 從 localStorage 獲取用戶ID
                 achievementId: '成就ID'  // 這裡需要動態傳遞具體的成就ID
-            }),  
+            }),
         });
 
         if (!unlockAchievementResponse.ok) {

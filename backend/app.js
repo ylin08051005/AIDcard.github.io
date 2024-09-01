@@ -10,6 +10,9 @@ const path = require('path'); // 新增這一行
 const achievementRoutes = require('./routes/achievementRoutes');
 const quizRoutes = require('./routes/quizRoutes');
 const { router: authRoutes, authMiddleware } = require('./routes/authRoutes');
+const lotteryRoutes = require('./routes/lotteryRoutes');
+const multer = require('multer');
+const RecyclingDiary = require('./models/recyclingDiaryModel'); // 引入回收日記模型
 
 const app = express();
 
@@ -22,6 +25,11 @@ console.log('After mounting achievements route');
 
 app.use('/api/auth', authRoutes); // 使用 /api/auth 路由
 app.use('/api', quizRoutes);
+app.use('/api', lotteryRoutes);
+
+// app.listen(5000, () => {
+//     console.log('Server is running on http://localhost:5000');
+// });
 
 console.log("Quiz routes are set up");
 
@@ -193,19 +201,102 @@ function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
-    if (token == null) return res.sendStatus(401); // 如果沒有 token，返回 401
+    // if (token == null) return res.sendStatus(401); // 如果沒有 token，返回 401
 
-    jwt.verify(token, 'your_jwt_secret', (err, user) => {
-        if (err) return res.sendStatus(403); // 如果 token 無效，返回 403
-        req.user = user; // 如果 token 有效，將用戶信息附加到請求對象
-        next(); // 調用 next() 進入下一個中間件或路由處理程序
-    });
+    // jwt.verify(token, process.env.SECRET_KEY || 'your_jwt_secret', (err, user) => {
+    //     if (err) return res.sendStatus(403); // 如果 token 無效，返回 403
+    //     req.user = user; // 如果 token 有效，將用戶信息附加到請求對象
+    //     next(); // 調用 next() 進入下一個中間件或路由處理程序
+    // });
+    if (!token) {
+        return res.status(401).json({ msg: 'No token, authorization denied' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.SECRET_KEY || 'your_jwt_secret');
+        req.user = decoded;
+        next();
+    } catch (e) {
+        res.status(403).json({ msg: 'Token is not valid' });
+    }
 }
 
-// // 測試路由
-// app.get('/test', (req, res) => {
-//     res.send('Test route working');
-// });
+// 回收日記路由
+app.post('/api/recycling-diary', authMiddleware, async (req, res) => {
+    try {
+        const { title, content, date } = req.body;
+        const userId = req.user.id;
+        
+        const newDiaryEntry = new RecyclingDiary({
+            userId,
+            title,
+            content,
+            date: date || new Date()
+        });
+
+        await newDiaryEntry.save();
+        res.json({ msg: '日記已保存', diary: newDiaryEntry });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+app.get('/api/recycling-diary', authMiddleware, async (req, res) => {
+    try {
+        const diaries = await RecyclingDiary.find({ userId: req.user.id });
+        console.log('Diaries retrieved:', diaries); // 添加這行來檢查日誌
+        res.json(diaries);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+app.put('/api/recycling-diary/:id', authMiddleware, async (req, res) => {
+    try {
+        const { title, content, date } = req.body;
+        const diary = await RecyclingDiary.findById(req.params.id);
+
+        if (!diary) {
+            return res.status(404).json({ msg: '日記未找到' });
+        }
+
+        if (diary.userId.toString() !== req.user.id) {
+            return res.status(401).json({ msg: '無權編輯此日記' });
+        }
+
+        diary.title = title || diary.title;
+        diary.content = content || diary.content;
+        diary.date = date || diary.date;
+
+        await diary.save();
+        res.json({ msg: '日記已更新', diary });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+app.delete('/api/recycling-diary/:id', authMiddleware, async (req, res) => {
+    try {
+        const diary = await RecyclingDiary.findById(req.params.id);
+
+        if (!diary) {
+            return res.status(404).json({ msg: '日記未找到' });
+        }
+
+        if (diary.userId.toString() !== req.user.id) {
+            return res.status(401).json({ msg: '無權刪除此日記' });
+        }
+
+        await diary.remove();
+        res.json({ msg: '日記已刪除' });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
 
 
 // 啟動伺服器

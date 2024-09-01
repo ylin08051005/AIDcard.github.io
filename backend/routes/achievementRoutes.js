@@ -4,7 +4,8 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const Achievement = require('../models/achievementModel');
 const User = require('../models/userModel');
-const { authMiddleware } = require('./authRoutes');
+// const { authMiddleware } = require('./authRoutes');
+const authMiddleware = require('../routes/authRoutes').authMiddleware;
 
 
 // 獲取所有成就的路由

@@ -3,12 +3,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const token = localStorage.getItem('token');
     // const userId = localStorage.getItem('userId'); // 確保 userId 被定義
     const userId = token ? JSON.parse(atob(token.split('.')[1])).userId : null;
-    
+
     // 確保 userId 被存儲在 localStorage 中
     if (userId) {
         localStorage.setItem('userId', userId);
     }
-    
+
     console.log("Token:", token);  // 用于调试
     console.log("UserId:", userId);  // 用于调试
 
@@ -24,8 +24,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const quizNav = document.getElementById('quizNav');
     const quizAnalyticsNav = document.getElementById('quizAnalyticsNav');
     const GeminiNav = document.getElementById('GeminiNav');
+    const LotteryNav = document.getElementById('LotteryNav');
+    const recycling_diaryNav = document.getElementById('recycling_diaryNav');
 
-    
+
+
     if (token && userId) {
         console.log("User is logged in.");  // 用于调试
         if (loginBtn) loginBtn.style.display = 'none';
@@ -40,6 +43,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (quizNav) quizNav.style.display = 'block'; // 顯示成就連結
         if (quizAnalyticsNav) quizAnalyticsNav.style.display = 'block';
         if (GeminiNav) GeminiNav.style.display = 'block';
+        if (LotteryNav) LotteryNav.style.display = 'block';
+        if (recycling_diaryNav) recycling_diaryNav.style.display = 'block';
 
     } else {
         console.log("User is not logged in.");  // 用于调试
@@ -55,13 +60,158 @@ document.addEventListener('DOMContentLoaded', function () {
         if (quizNav) quizNav.style.display = 'none'; // 顯示成就連結
         if (quizAnalyticsNav) quizAnalyticsNav.style.display = 'none';
         if (GeminiNav) GeminiNav.style.display = 'none';
+        if (LotteryNav) LotteryNav.style.display = 'none';
+        if (recycling_diaryNav) recycling_diaryNav.style.display = 'none';
     }
 
     // 如果是在quiz.html頁面，則加載測驗題目
     if (document.getElementById('quizForm')) {
         loadQuiz();
     }
+
+    // 抽獎功能代碼
+    const spinButton = document.getElementById('spinButton');
+    const wheel = document.getElementById('wheel');
+    let currentRotation = 0;
+
+    if (spinButton && wheel) {
+        spinButton.addEventListener('click', function () {
+            const segments = [
+                'Gold Watch',
+                'Gold Necklace',
+                'Silver Ring',
+                'Silver Bracelet',
+                'Bronze Medal',
+                'Bronze Keychain',
+                'Participation Certificate',
+                'Pen'
+            ];
+
+            const spinDeg = Math.floor(Math.random() * 360) + 1080;
+            currentRotation += spinDeg;
+            wheel.style.transition = 'transform 5s ease-out';
+            wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+            setTimeout(() => {
+                const normalizedDeg = currentRotation % 360;
+                const segmentAngle = 360 / segments.length;
+                const winningIndex = Math.floor(normalizedDeg / segmentAngle);
+                const selectedPrize = segments[segments.length - winningIndex - 1];
+
+                document.getElementById('lotteryResult').innerText = `恭喜你獲得了 ${selectedPrize}！`;
+            }, 5000);
+        });
+    } else {
+        console.error('Spin button or wheel element is missing.');
+    }
+
+    // 回收日記功能代碼
+    const diaryForm = document.getElementById('diaryForm');
+    if (diaryForm) {
+        const diaryEntry = document.getElementById('diaryEntry');
+        const diaryImage = document.getElementById('diaryImage');
+        const message = document.getElementById('message');
+        const diaryList = document.getElementById('diaryList');
+
+        diaryForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const entryText = diaryEntry.value.trim();
+            if (!entryText) {
+                message.textContent = "請填寫日記內容！";
+                return;
+            }
+
+            const formData = new FormData();
+            const entryTitle = '';
+            formData.append('title', entryTitle || ''); // 如果沒有 title 可以將其設置為空字串
+            formData.append('entry', entryText);
+            if (diaryImage.files[0]) {
+                formData.append('image', diaryImage.files[0]);
+            }
+
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                message.textContent = "未能獲取授權令牌，請重新登入。";
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/recycling-diary', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Error: ${errorText}`);
+                }
+
+                const result = await response.json();
+                console.log("伺服器回應結果:", result);
+
+                message.textContent = "日記提交成功！";
+                loadDiary();
+                diaryEntry.value = '';
+                diaryImage.value = '';
+
+            } catch (error) {
+                message.textContent = `提交失敗: ${error.message}`;
+            }
+        });
+
+        async function loadDiary() {
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                console.error('未能獲取授權令牌，請重新登入。');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/recycling-diary', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    console.error('Failed to load diaries:', response.status);
+                    return;
+                }
+
+                const diaries = await response.json();
+                const diaryList = document.getElementById('diaryList');
+                diaryList.innerHTML = '';
+
+                diaries.forEach(diary => {
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = `
+                        <p>${new Date(diary.date).toLocaleString()}</p>
+                        <p>${diary.title || 'No title'}</p>
+                        <p>${diary.content || 'No content'}</p>
+                        ${diary.image ? `<img src="${diary.image}" alt="日記圖片" style="max-width:100px;"/>` : ''}
+                    `;
+                    diaryList.appendChild(listItem);
+                });
+            } catch (error) {
+                console.error('Error loading diaries:', error);
+            }
+        }
+
+        loadDiary();
+    } else {
+        console.error('Diary form element is missing.');
+    }
 });
+
+
 
 // 當用戶提交註冊表單時
 document.getElementById('registerForm')?.addEventListener('submit', async (e) => {
@@ -224,3 +374,4 @@ async function loadQuiz() {
         alert('無法加載測驗，請檢查網絡連接或聯繫管理員。');
     }
 }
+

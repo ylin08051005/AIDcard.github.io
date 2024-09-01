@@ -9,7 +9,7 @@
     <!-- The above 4 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 
     <!-- Title -->
-    <title>使用者註冊</title>
+    <title>抽獎</title>
 
     <!-- Favicon -->
     <link rel="icon" href="img/core-img/favicon.ico">
@@ -18,8 +18,23 @@
     <link rel="stylesheet" href="style.css">
 </head>
 
-<body>
-    <h2>使用者註冊</h2>
+<body class="lottery-page">
+    <h1>抽獎</h1>
+    <!-- <button id="lotteryButton">抽獎</button> -->
+    <!-- 滾輪結構 -->
+    <div id="wheel" class="wheel">
+        <div class="wheel-segment" style="--i: 0;"><span>Gold Watch</span></div>
+        <div class="wheel-segment" style="--i: 1;"><span>Silver Ring</span></div>
+        <div class="wheel-segment" style="--i: 2;"><span>Bronze Medal</span></div>
+        <div class="wheel-segment" style="--i: 3;"><span>Gold Necklace</span></div>
+        <div class="wheel-segment" style="--i: 4;"><span>Silver Bracelet</span></div>
+        <div class="wheel-segment" style="--i: 5;"><span>Bronze Keychain</span></div>
+        <div class="wheel-segment" style="--i: 6;"><span>Participation Certificate</span></div>
+        <div class="wheel-segment" style="--i: 7;"><span>Pen</span></div>
+    </div>
+    <div class="pointer"></div> <!-- 指针位于轮盘外部 -->
+    <button id="spinButton">Spin the Wheel</button>
+    <p id="lotteryResult"></p>
 
     <!-- Preloader -->
     <div id="preloader">
@@ -234,19 +249,6 @@
     </header>
     <!-- ##### Header Area End ##### -->
 
-    <form id="registerForm">
-        <label for="username">使用者名稱：</label>
-        <input type="text" id="username" name="username" required><br><br>
-
-        <label for="password">密碼：</label>
-        <input type="password" id="password" name="password" required><br><br>
-
-        <label for="confirm_password">確認密碼：</label>
-        <input type="password" id="confirm_password" name="confirm_password" required><br><br>
-
-        <input type="submit" value="註冊">
-    </form>
-
     <!-- ##### Footer Area Start ##### -->
     <footer class="footer-area text-center">
         <div class="container">
@@ -327,32 +329,44 @@
     <!-- Active js -->
     <script src="js/active.js"></script>
 
-    <!-- <script src="js/scripts.js"></script> -->
+    <script src="js/scripts.js"></script>
 
     <script>
-        document.getElementById('registerForm').addEventListener('submit', async function (event) {
-            event.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirm_password').value;
+        document.addEventListener('DOMContentLoaded', function () {
+            const spinButton = document.getElementById('spinButton');
+            const wheel = document.getElementById('wheel');
+            let currentRotation = 0; // 保持當前的旋轉角度
 
-            if (password !== confirmPassword) {
-                alert('密碼和確認密碼不一致');
-                return;
-            }
+            if (spinButton && wheel) {
+                spinButton.addEventListener('click', function () {
+                    const segments = [
+                        'Gold Watch',
+                        'Gold Necklace',
+                        'Silver Ring',
+                        'Silver Bracelet',
+                        'Bronze Medal',
+                        'Bronze Keychain',
+                        'Participation Certificate',
+                        'Pen'
+                    ];
 
-            const response = await fetch('/api/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
+                    const spinDeg = Math.floor(Math.random() * 360) + 1080; // 隨機角度，確保至少旋轉3圈
+                    currentRotation += spinDeg; // 將本次旋轉角度累加到當前的旋轉角度
+                    wheel.style.transition = 'transform 5s ease-out';
+                    wheel.style.transform = `rotate(${currentRotation}deg)`;
 
-            const data = await response.json();
-            if (response.ok) {
-                alert('註冊成功');
-                window.location.href = '/login.html';
+                    // 等待動畫結束，然後確定獎品
+                    setTimeout(() => {
+                        const normalizedDeg = currentRotation % 360; // 確保角度在0-359之間
+                        const segmentAngle = 360 / segments.length; // 每個段的角度
+                        const winningIndex = Math.floor(normalizedDeg / segmentAngle); // 確定落在哪個段上
+                        const selectedPrize = segments[segments.length - winningIndex - 1]; // 確定選中的獎品
+
+                        document.getElementById('lotteryResult').innerText = `恭喜你獲得了 ${selectedPrize}！`;
+                    }, 5000); // 動畫持續時間後執行
+                });
             } else {
-                alert(data.msg || '註冊失敗');
+                console.error('Spin button or wheel element is missing.');
             }
         });
     </script>

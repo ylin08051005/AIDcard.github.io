@@ -9,7 +9,7 @@
     <!-- The above 4 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 
     <!-- Title -->
-    <title>AIDcard 自動回收裝置</title>
+    <title>回收日記</title>
 
     <!-- Favicon -->
     <link rel="icon" href="assets/img/core-img/favicon.ico">
@@ -17,9 +17,20 @@
     <!-- Style CSS -->
     <link rel="stylesheet" href="style.css">
 
+
+
 </head>
 
-<body>
+<body class="recycling-diary-body">
+
+    <!-- <form id="diaryForm">
+        <textarea id="diaryEntry"></textarea>
+        <input type="file" id="diaryImage">
+        <button type="submit">Submit Diary</button>
+        <p id="message"></p>
+    </form>
+    <ul id="diaryList"></ul> -->
+
     <!-- Preloader -->
     <div id="preloader">
         <div class="preload-content">
@@ -149,8 +160,7 @@
                                             <li><a href="contact.html">Contact</a></li>
                                             <li><a href="coming-soon.html">Coming Soon</a></li>
                                             <li id="LotteryNav"><a href="lottery.html">Lottery</a></li>
-                                            <li id="recycling_diaryNav"><a href="recycling_diary.html">Recycling Diary</a></li>
-                                            
+
                                         </ul>
                                     </li>
                                     <li><a href="#">Catagory</a>
@@ -235,33 +245,24 @@
         </div>
     </header>
     <!-- ##### Header Area End ##### -->
-     
-    <main>
-        <h1>Welcome home</h1>
-        <button id="registerBtn" style="display:none;" onclick="window.location.href='register.html';">註冊</button>
-        <button id="loginBtn" style="display:none;" onclick="window.location.href='login.html';">登入</button>
-        <button id="logoutBtn" style="display:none;" onclick="logout()">登出</button>
 
-        <div id="generalFeatures">
-            <button onclick="alert('Button 1 Clicked')">Button 1</button>
-            <button onclick="alert('Button 2 Clicked')">Button 2</button>
-            <!-- Other general buttons -->
-        </div>
+    <!-- 日記頁面的主要內容 -->
+    <div class="recycling-diary-container">
+        <h1 class="recycling-diary-header">我的回收日記</h1>
+        <form id="diaryForm">
+            <textarea id="diaryEntry" class="recycling-diary-textarea" placeholder="今天的回收活動..."></textarea>
+            <input type="file" id="diaryImage">
+            <button type="submit" class="recycling-diary-button">保存日記</button>
+        </form>
+        <p id="message" class="recycling-diary-message"></p>
 
-        <div id="loggedInFeatures" style="display:none;">
-            <button onclick="window.location.href='education.html';">觀看回收教育宣導</button>
-            <button onclick="window.location.href='feedback.html';">使用者反饋</button>
-            <button onclick="window.location.href='quiz.html';">回收知識測驗</button>
-            <button onclick="window.location.href='leaderboard.html';">積分系統與排行榜</button>
-            <button onclick="window.location.href='achievements.html';">每日挑戰與成就系統</button>
-            <button onclick="window.location.href='image_predict.html';">Image Predict</button>
-            <button onclick="window.location.href='quizAnalytics.html';">quizAnalytics</button>
-            <button onclick="window.location.href='Gemini_connect.html';">Gemini_connect</button>
-            <button onclick="window.location.href='lottery.html';">Lottery</button>
-            <button onclick="window.location.href='recycling_diary.html';">Recycling Diary</button>
-            <!-- Other logged-in user-specific features -->
+        <div class="recycling-diary-history">
+            <h2>過去的日記</h2>
+            <ul id="diaryList" class="recycling-diary-list">
+                <!-- 這裡會顯示保存的日記 -->
+            </ul>
         </div>
-    </main>
+    </div>
 
     <!-- ##### Hero Area Start ##### -->
     <div class="hero-area">
@@ -806,6 +807,103 @@
 
     <script src="js/scripts.js"></script>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const diaryForm = document.getElementById('diaryForm');
+            if (diaryForm) {
+                const diaryEntry = document.getElementById('diaryEntry');
+                const diaryImage = document.getElementById('diaryImage');
+                const message = document.getElementById('message');
+                const diaryList = document.getElementById('diaryList');
+
+                diaryForm.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+
+                    const entryTitle = document.getElementById('diaryTitle').value.trim();
+                    const entryText = diaryEntry.value.trim();
+                    if (!entryText) {
+                        message.textContent = "請填寫日記內容！";
+                        return;
+                    }
+
+                    const formData = new FormData();
+                    formData.append('entry', entryText);
+                    if (diaryImage.files[0]) {
+                        formData.append('image', diaryImage.files[0]);
+                    }
+
+                    try {
+                        const response = await fetch('/api/recycling-diary', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(`Error: ${errorText}`);
+                        }
+
+                        const result = await response.json();
+                        message.textContent = "日記提交成功！";
+                        loadDiary();
+                        diaryEntry.value = '';
+                        diaryImage.value = '';
+
+                    } catch (error) {
+                        message.textContent = `提交失敗: ${error.message}`;
+                    }
+                });
+
+                async function loadDiary() {
+                    try {
+                        const token = localStorage.getItem('token');
+                        if (!token) {
+                            throw new Error('Token is missing');
+                        }
+
+                        const response = await fetch('/api/recycling-diary', {
+                            method: 'GET',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            }
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`Failed to load diaries: ${response.statusText}`);
+                        }
+
+                        const diaries = await response.json();
+                        if (!Array.isArray(diaries)) {
+                            throw new Error('Unexpected response format');
+                        }
+
+                        // 處理日記顯示邏輯
+                        diaryList.innerHTML = '';
+
+                        diaries.forEach(diary => {
+                            const listItem = document.createElement('li');
+                            listItem.innerHTML = `
+                                <p>${diary.date}</p>
+                                <p>${diary.entry}</p>
+                                ${diary.image ? `<img src="${diary.image}" alt="日記圖片" style="max-width:100px;"/>` : ''}
+                            `;
+                            diaryList.appendChild(listItem);
+                        });
+                    } catch (error) {
+                        console.error('Error loading diary entries:', error);
+                        alert('無法加載日記條目，請確認您的身份是否驗證通過。');
+                    }
+                }
+
+
+
+                loadDiary();
+            } else {
+                console.error('Diary form element is missing.');
+            }
+        });
+    </script>
 </body>
 
 </html>

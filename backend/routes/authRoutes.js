@@ -68,19 +68,8 @@ router.post('/login', async (req, res) => {
 });
 
 function authMiddleware(req, res, next) {
-
-    // const authHeader = req.header('Authorization');
-    // console.log('Authorization Header:', authHeader); // 確認接收到的Authorization header
-    
-    // if (!authHeader) {
-    //     console.error('No Authorization header');
-    //     return res.status(401).json({ msg: 'No token, authorization denied' });
-    // }
-
-    // const token = req.header('x-auth-token');
-    // const token = req.header('Authorization').replace('Bearer ', '');
-    // const token = authHeader.replace('Bearer ', '');
     const token = req.header('Authorization') ? req.header('Authorization').replace('Bearer ', '') : null;
+    console.log('Token:', token);
     if (!token) {
         console.error('Token missing in Authorization header');
         return res.status(401).json({ msg: 'No token, authorization denied' });
@@ -90,6 +79,13 @@ function authMiddleware(req, res, next) {
         // const decoded = jwt.verify(token, 'yourSecretKey');
         const decoded = jwt.verify(token, 'your_jwt_secret');
         console.log('Decoded JWT:', decoded);  // 檢查JWT的解碼結果
+
+        // 確保解碼後的數據中包含 userId
+        if (!decoded.userId) {
+            console.error('User ID is missing in the token');
+            return res.status(400).json({ msg: 'Invalid token payload' });
+        }
+        
         req.user = decoded;  // 直接將整個 decoded 物件賦值給 req.user
         next();
     } catch (err) {

@@ -7,6 +7,11 @@ const Quiz = require('../models/quizModel');
 const AnswerRecord = require('../models/answerRecordModel');
 const User = require('../models/userModel'); // 確保已正確導入 User 模型
 const QuizResult = require('../models/QuizResult');
+const LotteryRecord = require('../models/lotteryRecordModel');
+// const authMiddleware = require('./authRoutes').authMiddleware;
+const { authMiddleware } = require('./authRoutes');
+
+// const prizeModel = require('../models/prizeModel');
 
 // 創建測驗的路由
 router.post('/createQuiz', async (req, res) => {
@@ -139,7 +144,7 @@ router.get('/quizStats/:quizId', async (req, res) => {
             console.log(`Quiz with id ${quizId} does not exist in the database`);
             return res.status(404).json({ msg: 'Quiz not found' });
         }
-        
+
         // 查询该 quizId 的总答题数
         const totalAttempts = await AnswerRecord.countDocuments({ quizId });
         // 查询该 quizId 的正确答题数
@@ -226,12 +231,14 @@ router.get('/timePerformance', async (req, res) => {
 router.get('/completionTimeDistribution', async (req, res) => {
     try {
         const completionTimes = await QuizResult.aggregate([
-            { $bucket: {
-                groupBy: "$timeSpent",
-                boundaries: [0, 60, 120, 180, 240, 300, 600, 1200],
-                default: "Other",
-                output: { count: { $sum: 1 } }
-            }}
+            {
+                $bucket: {
+                    groupBy: "$timeSpent",
+                    boundaries: [0, 60, 120, 180, 240, 300, 600, 1200],
+                    default: "Other",
+                    output: { count: { $sum: 1 } }
+                }
+            }
         ]);
         res.json(completionTimes);
     } catch (error) {
@@ -261,6 +268,57 @@ router.get('/userProgress', async (req, res) => {
         res.json(progress);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch user progress data' });
+    }
+});
+
+// 抽獎功能路由
+router.post('/lottery', authMiddleware, async (req, res) => {
+    const userId = req.user && req.user.userId ? req.user.userId : null;
+
+    if (!userId) {
+        console.error('User ID is missing or invalid');
+        return res.status(400).json({ msg: 'User ID is missing or invalid' });
+    }
+
+    try {
+        console.log('Received lottery request:', req.body);
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+
+        // 獎品等級及相應的積分門檻
+        const prizeLevels = [
+            { level: 'Gold', threshold: 100, prizes: ['Gold Watch', 'Gold Necklace'] },
+            { level: 'Silver', threshold: 50, prizes: ['Silver Ring', 'Silver Bracelet'] },
+            { level: 'Bronze', threshold: 20, prizes: ['Bronze Medal', 'Bronze Keychain'] },
+            { level: 'Participant', threshold: 0, prizes: ['Participation Certificate', 'Pen'] }
+        ];
+
+        // 根據用戶的積分確定可抽獎的等級
+        const availablePrizes = prizeLevels.find(level => user.points >= level.threshold);
+
+        if (!availablePrizes) {
+            return res.status(400).json({ msg: 'Insufficient points for any prize' });
+        }
+
+        // 隨機選擇一個獎品
+        const selectedPrize = availablePrizes.prizes[Math.floor(Math.random() * availablePrizes.prizes.length)];
+
+        // 假設我們將用戶的獲獎信息記錄在一個集合中
+        const lotteryRecord = new LotteryRecord({
+            userId: user._id,
+            prize: selectedPrize,
+            timestamp: new Date()
+        });
+
+        await lotteryRecord.save();
+
+        return res.json({ msg: selectedPrize });
+    } catch (err) {
+        console.error('Error during lottery:', err.message);
+        res.status(500).json({ msg: '伺服器錯誤' });
     }
 });
 
