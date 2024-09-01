@@ -62,6 +62,10 @@ https://github.com/AgaMiko/waste-datasets-review
 * 有沒有可能用 generative AI, 生成垃圾圖片?
 
 # 詠琪
+20240901
+1. 加入回收日記功能。(還須解決bug)
+2. 加入抽獎功能。
+
 20240828
 1. 將專案套入模板中。
 2. Todo list 中的資料分析敘述優化。(請看下方)
