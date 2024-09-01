@@ -116,6 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
         diaryForm.addEventListener('submit', async function (e) {
             e.preventDefault();
 
+            const entryTitle = document.getElementById('diaryTitle').value.trim();
             const entryText = diaryEntry.value.trim();
             if (!entryText) {
                 message.textContent = "請填寫日記內容！";
@@ -123,8 +124,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             const formData = new FormData();
-            const entryTitle = '';
-            formData.append('title', entryTitle || ''); // 如果沒有 title 可以將其設置為空字串
+            formData.append('title', entryTitle); // 如果沒有 title 可以將其設置為空字串
             formData.append('entry', entryText);
             if (diaryImage.files[0]) {
                 formData.append('image', diaryImage.files[0]);
@@ -157,6 +157,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 message.textContent = "日記提交成功！";
                 loadDiary();
                 diaryEntry.value = '';
+                if (diaryTitle) diaryTitle.value = ''; // 清空標題欄
                 diaryImage.value = '';
 
             } catch (error) {
@@ -165,43 +166,44 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         async function loadDiary() {
-            const token = localStorage.getItem('token');
-
-            if (!token) {
-                console.error('未能獲取授權令牌，請重新登入。');
-                return;
-            }
-
             try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('Token is missing');
+                }
+
                 const response = await fetch('/api/recycling-diary', {
                     method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${token}`,
+                        'Authorization': `Bearer ${token}`, // 添加 token 到請求標頭
                         'Content-Type': 'application/json'
                     }
                 });
 
                 if (!response.ok) {
-                    console.error('Failed to load diaries:', response.status);
-                    return;
+                    throw new Error(`Failed to load diaries: ${response.statusText}`);
                 }
 
                 const diaries = await response.json();
-                const diaryList = document.getElementById('diaryList');
+                if (!Array.isArray(diaries)) {
+                    throw new Error('Unexpected response format');
+                }
+
+                // 處理日記顯示邏輯
                 diaryList.innerHTML = '';
 
                 diaries.forEach(diary => {
                     const listItem = document.createElement('li');
                     listItem.innerHTML = `
                         <p>${new Date(diary.date).toLocaleString()}</p>
-                        <p>${diary.title || 'No title'}</p>
-                        <p>${diary.content || 'No content'}</p>
+                        <p>${diary.entry}</p>
                         ${diary.image ? `<img src="${diary.image}" alt="日記圖片" style="max-width:100px;"/>` : ''}
                     `;
                     diaryList.appendChild(listItem);
                 });
             } catch (error) {
-                console.error('Error loading diaries:', error);
+                console.error('Error loading diary entries:', error);
+                alert('無法加載日記條目，請確認您的身份是否驗證通過。');
             }
         }
 
@@ -210,8 +212,6 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error('Diary form element is missing.');
     }
 });
-
-
 
 // 當用戶提交註冊表單時
 document.getElementById('registerForm')?.addEventListener('submit', async (e) => {
