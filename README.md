@@ -38,6 +38,9 @@ node frontend\app.js
 http://localhost:3000/index.html
 
 # 聖安
+20240904
+還原到原始版本
+
 20240822
 已將我的CNN影像辨識模型, VGG16，訓練於 trashnet 資料集，放到網頁上去、並且可以展示結果！
 
