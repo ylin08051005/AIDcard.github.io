@@ -60,7 +60,6 @@ http://localhost:3000/index.html
 * 把接收資料夾不要每次都用覆蓋的、可以自動偵測指定資料夾的檔名、並且自動加在最後面。
 * 多 train 一個 yolo 上去做 object detection.
 https://github.com/AgaMiko/waste-datasets-review
-* 想辦法讓使用者也可以自己上傳圖片
 * 多 train 一個 mobilenet 上去。
 * 紀錄回收內容。
 * 有三個影像辨識模型可以做投票。
