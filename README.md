@@ -38,6 +38,9 @@ node frontend\app.js
 http://localhost:3000/index.html
 
 # 聖安
+20240908
+在 Image Predict Page, 不只可以從手機上傳圖片，也可以直接用 upload image bottom 上傳指定圖片！
+
 20240904
 還原到原始版本
 
