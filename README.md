@@ -47,6 +47,9 @@ Gemini API 適用的 Python SDK 包含在 google-generativeai 套件。使用 pi
 ※若想創建自己的金鑰，請進入此網址執行操作 : https://aistudio.google.com/app/apikey
 
 # 聖安
+20240908
+在 Image Predict Page, 不只可以從手機上傳圖片，也可以直接用 upload image bottom 上傳指定圖片！
+
 20240904
 還原到原始版本
 
@@ -66,7 +69,6 @@ Gemini API 適用的 Python SDK 包含在 google-generativeai 套件。使用 pi
 * 把接收資料夾不要每次都用覆蓋的、可以自動偵測指定資料夾的檔名、並且自動加在最後面。
 * 多 train 一個 yolo 上去做 object detection.
 https://github.com/AgaMiko/waste-datasets-review
-* 想辦法讓使用者也可以自己上傳圖片
 * 多 train 一個 mobilenet 上去。
 * 紀錄回收內容。
 * 有三個影像辨識模型可以做投票。
