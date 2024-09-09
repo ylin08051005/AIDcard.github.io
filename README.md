@@ -37,6 +37,15 @@ node frontend\app.js
 進入此網址執行操作
 http://localhost:3000/index.html
 
+
+## Google Gemini API使用指南
+
+Gemini API 適用的 Python SDK 包含在 google-generativeai 套件。使用 pip 安裝依附元件： pip install -q -U google-generativeai
+
+注意事項: (1)請確保您的開發環境 須符合下列條件：Python 3.9 以上版本 (2)若要使用自用的Google Gemini API，在 Google_gemini.py檔案中 程式碼中的變數GOOGLE_API_KEY進行更改 (3)預設的API是最簡易的版本(並非付費版本)，因此有使用次數限制，若一次進行過多次請求，會發生請求失誤的問題。
+
+※若想創建自己的金鑰，請進入此網址執行操作 : https://aistudio.google.com/app/apikey
+
 # 聖安
 20240904
 還原到原始版本
@@ -96,3 +105,8 @@ https://github.com/AgaMiko/waste-datasets-review
    *  CNN準確率分析：對CNN模型的準確率進行時間序列分析，顯示模型在不同時間段的表現（x 軸：時間；y 軸：準確率）。
    *  用戶學習進步追蹤：追蹤並視覺化用戶隨著時間的學習進步情況，顯示他們在多次測驗中的表現變化，並提供個性化的進步建議。
 5. 回收教育宣導內容
+# 沂萱
+## Todo
+1. 連接網頁
+2. 提升效能，如果有大量圖片需要處理，可以使用多線程或多進程來提升效能，避免單線程的時間延遲
+3. 增加日誌記錄，使用日誌記錄而非 print，可以更好追蹤、排錯
