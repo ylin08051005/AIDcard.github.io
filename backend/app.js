@@ -14,7 +14,55 @@ const lotteryRoutes = require('./routes/lotteryRoutes');
 const multer = require('multer');
 const RecyclingDiary = require('./models/recyclingDiaryModel'); // 引入回收日記模型
 
+
+const http = require('http');
+const socketIo = require('socket.io');
+const { SerialPort } = require('serialport');  // SerialPort
+const { ReadlineParser } = require('@serialport/parser-readline');
+
+
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
+
+// copy portname 
+// 替換為你的設備名稱 (Windows 通常是 COMx 形式)
+const port = new SerialPort({ path: 'COM3', baudRate: 9600 }, (err) => {
+    if (err) {
+        return console.log('Error opening port: ', err.message);
+    }
+});
+
+// 錯誤事件監聽
+port.on('error', function(err) {
+    console.log('Error: ', err.message);
+});
+
+const parser = port.pipe(new ReadlineParser({ delimiter: '\n' }));
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+io.on('connection', (socket) => {
+  console.log('A user connected');
+
+  socket.on('turnOnLight1', () => {
+    port.write('1');
+    setTimeout(() => {
+      port.write('0');  // 3秒後關燈1
+    }, 3000);
+  });
+
+  socket.on('turnOnLight2', () => {
+    port.write('3');
+    setTimeout(() => {
+      port.write('2');  // 3秒後關燈2
+    }, 3000);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
+  });
+});
 
 // 解析 JSON 請求
 app.use(express.json());
