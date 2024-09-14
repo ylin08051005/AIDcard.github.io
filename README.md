@@ -37,7 +37,22 @@ node frontend\app.js
 進入此網址執行操作
 http://localhost:3000/index.html
 
+
+## Google Gemini API使用指南
+
+Gemini API 適用的 Python SDK 包含在 google-generativeai 套件。使用 pip 安裝依附元件： pip install -q -U google-generativeai
+
+注意事項: (1)請確保您的開發環境 須符合下列條件：Python 3.9 以上版本 (2)若要使用自用的Google Gemini API，在 Google_gemini.py檔案中 程式碼中的變數GOOGLE_API_KEY進行更改 (3)預設的API是最簡易的版本(並非付費版本)，因此有使用次數限制，若一次進行過多次請求，會發生請求失誤的問題。
+
+※若想創建自己的金鑰，請進入此網址執行操作 : https://aistudio.google.com/app/apikey
+
 # 聖安
+20240908
+在 Image Predict Page, 不只可以從手機上傳圖片，也可以直接用 upload image bottom 上傳指定圖片！
+
+20240904
+還原到原始版本
+
 20240822
 已將我的CNN影像辨識模型, VGG16，訓練於 trashnet 資料集，放到網頁上去、並且可以展示結果！
 
@@ -54,7 +69,6 @@ http://localhost:3000/index.html
 * 把接收資料夾不要每次都用覆蓋的、可以自動偵測指定資料夾的檔名、並且自動加在最後面。
 * 多 train 一個 yolo 上去做 object detection.
 https://github.com/AgaMiko/waste-datasets-review
-* 想辦法讓使用者也可以自己上傳圖片
 * 多 train 一個 mobilenet 上去。
 * 紀錄回收內容。
 * 有三個影像辨識模型可以做投票。
@@ -93,3 +107,8 @@ https://github.com/AgaMiko/waste-datasets-review
    *  CNN準確率分析：對CNN模型的準確率進行時間序列分析，顯示模型在不同時間段的表現（x 軸：時間；y 軸：準確率）。
    *  用戶學習進步追蹤：追蹤並視覺化用戶隨著時間的學習進步情況，顯示他們在多次測驗中的表現變化，並提供個性化的進步建議。
 5. 回收教育宣導內容
+# 沂萱
+## Todo
+1. 連接網頁
+2. 提升效能，如果有大量圖片需要處理，可以使用多線程或多進程來提升效能，避免單線程的時間延遲
+3. 增加日誌記錄，使用日誌記錄而非 print，可以更好追蹤、排錯

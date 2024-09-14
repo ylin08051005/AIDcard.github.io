@@ -238,6 +238,12 @@
     </header>
     <!-- ##### Header Area End ##### -->
     <main>
+
+        <h1>Upload an Image for Prediction</h1>
+        <input type="file" id="uploadImageInput" accept="image/*">
+        <button id="uploadButton">Upload Image</button>
+
+
         <h1>Fetch Image From Server</h1>
 
         <h2>Latest Image Received:</h2>
@@ -250,6 +256,52 @@
         <p id="statusMessage">等待接收...</p>
 
         <script>
+
+        document.getElementById('uploadButton').addEventListener('click', function() {
+            const fileInput = document.getElementById('uploadImageInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                document.getElementById('statusMessage').innerText = '請選擇一張圖片';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            fetch('http://127.0.0.1:8080/post_from_upload', { // 替換為你的伺服器端點
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('上傳失敗');
+                }
+            })
+            .then(data => {
+                // 顯示圖片
+                const imgUrl = "data:image/jpeg;base64," + data.image_data;
+                document.getElementById('uploadedImage').src = imgUrl;
+
+                // 顯示分類結果
+                const classificationText = `Class Name: ${data.class_name}, Class Number: ${data.class_num}`;
+                document.getElementById('classificationResult').innerText = classificationText;
+
+                document.getElementById('statusMessage').innerText = '圖片成功上傳並分類';
+            })
+            .catch(error => {
+                console.log('Error:', error);
+                document.getElementById('statusMessage').innerText = 'Error: ' + error.message;
+            });
+        });
+
+
+
+
+
+
             function checkForNewImage() {
                 document.getElementById('statusMessage').innerText = "Fetching data...";
 

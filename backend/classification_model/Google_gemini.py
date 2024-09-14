@@ -5,21 +5,20 @@ import os
 import requests
 import base64
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
-import re
+
 
 
 
 # 將 API 鍵設置為變數
 GOOGLE_API_KEY = "AIzaSyCnzKY6McxENFeJDwfrODSXq49GNc9ji_w"
 
-# 使用 configure 方法設置 API 鍵
 genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
 
-# 使用模組的其他功能
+
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 # 定義圖片所在路徑
-dir_path = r"C:\test\Google_Gemini_API\dataset-resized"
+dir_path = r"C:\test\Google_Gemini_API\dataset-resized\trash"
 url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={GOOGLE_API_KEY}"
 
 
@@ -53,71 +52,58 @@ def classification(img_path):
         ]
     }
 
-    # 發送請求
+
         response = requests.post(url, headers=headers, json=data)
-        # 處理響應
         if response.status_code == 200:
             try:
                 result = response.json()
 
-            
-                # 提取文本並去除多餘的空格和換行符
                 answer = result['candidates'][0]['content']['parts'][0]['text'].strip()
                 valid_categories = ['glass', 'metal', 'paper', 'cardboard', 'plastic', 'trash']
                 if answer.lower() in valid_categories:
                     return answer
                 else:
-                    return "未識別到有效內容"
-            except KeyError as e:
-                print(f"響應中缺少鍵: {e}")
-                print("響應內容:", result)
-                return None
+                    return "trash"  # 如果答案無效，返回 "trash"
+            except KeyError:
+                return "trash"  # 如果 KeyError，返回 "trash"
         else:
-            print(f"請求失敗，狀態碼：{response.status_code}")
-            print(f"服務器響應：{response.text}")
-            return None
+            return "trash"  # 如果請求失敗，返回 "trash"
 
 def classification_with_retry(img_path, retries=3, delay=5):
     for attempt in range(retries):
         try:
-            return classification(img_path)
-        except requests.ConnectionError as e:
-            print(f"請求失敗（{attempt+1}/{retries}），錯誤: {e}")
+            return classification(img_path) or "trash"  # 無論如何返回 "trash"
+        except requests.ConnectionError:
             if attempt < retries - 1:
                 time.sleep(delay)
             else:
-                raise e
+                return "trash"  # 如果所有嘗試失敗，返回 "trash"
 
 true_labels = []
 predicted_labels = []
 
-# 遍歷所有子資料夾
+
 for root, dirs, files in os.walk(dir_path):
     for filename in files:
         if filename.lower().endswith('.jpg'):
             img_path = os.path.join(root, filename)
             
-            # 獲取真實標籤（使用資料夾名稱作為標籤）
             true_label = os.path.basename(root).lower()
             
             # 如果是在 __MACOSX 資料夾中，跳過
             if '__MACOSX' in root:
                 continue
             
-            # 進行分類
             predicted_label = classification_with_retry(img_path)
             
-            # 預測成功才進行標籤
             if predicted_label is not None:
                 true_labels.append(true_label)
                 predicted_labels.append(predicted_label)
             
-            # 輸出分類結果
             print(f"{filename} ：{predicted_label}")
             
             time.sleep(2)
 
-# 檢查過濾後的長度是否相等
 if len(true_labels) != len(predicted_labels):
     raise ValueError("The number of filtered true labels and predicted labels do not match.")
 
@@ -130,3 +116,7 @@ all_possible_labels = ['glass', 'metal', 'paper', 'cardboard', 'plastic', 'trash
 class_report = classification_report(true_labels, predicted_labels, labels=all_possible_labels)
 print("分類報告:")
 print(class_report)
+
+
+
+
