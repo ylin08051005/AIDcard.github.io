@@ -76,8 +76,12 @@ https://github.com/AgaMiko/waste-datasets-review
 * 有沒有可能用 generative AI, 生成垃圾圖片?
 
 # 詠琪
+2024.09.15
+1. 回收日記功能完成。
+2. 
+
 20240909
-將雨翾的Arduino 相關資料夾檔案加入web_easy
+將雨翾的Arduino 相關資料夾檔案加入web_easy。
 
 20240901
 1. 加入回收日記功能。(還須解決bug)
