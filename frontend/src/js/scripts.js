@@ -374,4 +374,3 @@ async function loadQuiz() {
         alert('無法加載測驗，請檢查網絡連接或聯繫管理員。');
     }
 }
-

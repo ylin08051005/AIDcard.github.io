@@ -1,10 +1,9 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
+from werkzeug.utils import secure_filename
+from PIL import Image
+from classification_model.Google_gemini import classify_image_with_retry  # 使用修改後的分類函數
 
 app = Flask(__name__)
-
-@app.route('/', methods=['GET'])
-def home():
-    return "Hello, Flask is running!", 200
 
 @app.route('/receive_images', methods=['POST'])
 def receive_images():
@@ -17,13 +16,43 @@ def receive_images():
 
     return jsonify({"message": "Images received successfully", "count": len(image_urls)})
 
-@main.route('/')
+@app.route('/', methods=['GET'])
 def home():
-    return render_template('index.html')
+    return render_template('index_new.html')
 
-@main.route('/Gemini_connect') 
+@app.route('/Gemini_connect') 
 def new_page():
     return render_template('Gemini_connect.html')
+
+# 設置允許的文件類型
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/classify_image', methods=['POST'])
+def classify_image_endpoint():
+    print("Request received!")
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
     
+    file = request.files['file']
+    
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+    
+    if file and allowed_file(file.filename):
+        try:
+            image = Image.open(file)
+            # 使用 Google_gemini.py 中的分類函數來進行分類
+            category = classify_image_with_retry(image)
+
+            return jsonify({"category": category}), 200
+        except Exception as e:
+            print(f"Error during classification: {str(e)}")
+            return jsonify({"error": "Internal server error occurred"}), 500
+    else:
+        return jsonify({"error": "Invalid file type"}), 400
+
 if __name__ == '__main__':
     app.run(port=5000)

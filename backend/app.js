@@ -13,7 +13,7 @@ const { router: authRoutes, authMiddleware } = require('./routes/authRoutes');
 const lotteryRoutes = require('./routes/lotteryRoutes');
 const multer = require('multer');
 const RecyclingDiary = require('./models/recyclingDiaryModel'); // 引入回收日記模型
-
+// const google_gemini_connect = require('/')
 
 const http = require('http');
 const socketIo = require('socket.io');
@@ -347,6 +347,21 @@ app.delete('/api/recycling-diary/:id', authMiddleware, async (req, res) => {
     }
 });
 
+// 圖像分類路由
+app.post('/classify_image', (req, res) => {
+    // 假設 req.body 包含圖像資料
+    const imageData = req.body.image;
+    
+    // 調用Google Gemini分類功能，這裡假設已經在某個模組中定義該功能
+    googleGemini.classifyImage(imageData)
+        .then(result => {
+            res.json({ classification: result });
+        })
+        .catch(err => {
+            console.error(err);
+            res.status(500).json({ error: 'Image classification failed' });
+        });
+});
 
 // 啟動伺服器
 const PORT = process.env.PORT || 5000;
