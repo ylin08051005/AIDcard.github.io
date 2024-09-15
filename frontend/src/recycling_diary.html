@@ -1,3 +1,4 @@
+<!-- frontend/src/recycling_diary.html -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -812,31 +813,40 @@
         document.addEventListener('DOMContentLoaded', function () {
             const diaryForm = document.getElementById('diaryForm');
             if (diaryForm) {
+                const diaryTitle = document.getElementById('diaryTitle');
                 const diaryEntry = document.getElementById('diaryEntry');
-                const diaryImage = document.getElementById('diaryImage');
                 const message = document.getElementById('message');
                 const diaryList = document.getElementById('diaryList');
 
                 diaryForm.addEventListener('submit', async function (e) {
                     e.preventDefault();
 
-                    const entryTitle = document.getElementById('diaryTitle').value.trim();
+                    const entryTitle = diaryTitle.value.trim();
                     const entryText = diaryEntry.value.trim();
                     if (!entryText) {
                         message.textContent = "請填寫日記內容！";
                         return;
                     }
 
-                    const formData = new FormData();
-                    formData.append('entry', entryText);
-                    if (diaryImage.files[0]) {
-                        formData.append('image', diaryImage.files[0]);
+                    const data = {
+                        title: entryTitle,
+                        content: entryText,
+                    };
+
+                    const token = localStorage.getItem('token'); // 確保在這裡獲取到 token
+                    if (!token) {
+                        message.textContent = "未找到授權令牌，請重新登錄。";
+                        return;
                     }
 
                     try {
                         const response = await fetch('/api/recycling-diary', {
                             method: 'POST',
-                            body: formData
+                            body: JSON.stringify(data),
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            }
                         });
 
                         if (!response.ok) {
@@ -845,12 +855,15 @@
                         }
 
                         const result = await response.json();
+                        console.log('Server response:', result);
+
                         message.textContent = "日記提交成功！";
                         loadDiary();
-                        diaryEntry.value = '';
-                        diaryImage.value = '';
+                        diaryTitle.value = ''; // 清空標題
+                        diaryEntry.value = ''; // 清空內容
 
                     } catch (error) {
+                        console.error('Error:', error);
                         message.textContent = `提交失敗: ${error.message}`;
                     }
                 });
@@ -885,9 +898,9 @@
                         diaries.forEach(diary => {
                             const listItem = document.createElement('li');
                             listItem.innerHTML = `
-                                <p>${diary.date}</p>
-                                <p>${diary.entry}</p>
-                                ${diary.image ? `<img src="${diary.image}" alt="日記圖片" style="max-width:100px;"/>` : ''}
+                                <p>${new Date(diary.date).toLocaleString()}</p>
+                                <p>${diary.title || '無標題'}</p>
+                                <p>${diary.content || '無內容'}</p>
                             `;
                             diaryList.appendChild(listItem);
                         });
@@ -896,8 +909,6 @@
                         alert('無法加載日記條目，請確認您的身份是否驗證通過。');
                     }
                 }
-
-
 
                 loadDiary();
             } else {

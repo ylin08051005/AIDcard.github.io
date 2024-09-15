@@ -272,6 +272,7 @@ function authenticateToken(req, res, next) {
 // 回收日記路由
 app.post('/api/recycling-diary', authMiddleware, async (req, res) => {
     try {
+        console.log("Request body:", req.body); // 添加這一行來檢查請求體
         const { title, content, date } = req.body;
         const userId = req.user.id;
         
