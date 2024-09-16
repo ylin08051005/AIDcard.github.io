@@ -114,7 +114,6 @@ https://github.com/AgaMiko/waste-datasets-review
 4. 回收教育宣導內容
 5. 積分系統要每次關掉都可以歸0
 6. 多測幾個測驗，圖表只要能顯示出測驗的比例就好
-7. 登出頁面要記得加上不須登入的功能按鍵
 
 # 沂萱
 ## Todo
