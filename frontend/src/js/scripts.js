@@ -26,6 +26,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const GeminiNav = document.getElementById('GeminiNav');
     const LotteryNav = document.getElementById('LotteryNav');
     const recycling_diaryNav = document.getElementById('recycling_diaryNav');
+    const arduinoNav = document.getElementById('arduinoNav');
+    const educationNav = document.getElementById('educationNav');
+    const feedbackNav = document.getElementById('feedbackNav');
 
 
 
@@ -45,6 +48,9 @@ document.addEventListener('DOMContentLoaded', function () {
         if (GeminiNav) GeminiNav.style.display = 'block';
         if (LotteryNav) LotteryNav.style.display = 'block';
         if (recycling_diaryNav) recycling_diaryNav.style.display = 'block';
+        if (arduinoNav) arduinoNav.style.display = 'block';
+        if (educationNav) educationNav.style.display = 'block';
+        if (feedbackNav) feedbackNav.style.display = 'block';
 
     } else {
         console.log("User is not logged in.");  // 用于调试
@@ -62,6 +68,9 @@ document.addEventListener('DOMContentLoaded', function () {
         if (GeminiNav) GeminiNav.style.display = 'none';
         if (LotteryNav) LotteryNav.style.display = 'none';
         if (recycling_diaryNav) recycling_diaryNav.style.display = 'none';
+        if (arduinoNav) arduinoNav.style.display = 'block';
+        if (educationNav) educationNav.style.display = 'block';
+        if (feedbackNav) feedbackNav.style.display = 'block';
     }
 
     // 如果是在quiz.html頁面，則加載測驗題目

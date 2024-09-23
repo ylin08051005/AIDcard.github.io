@@ -789,9 +789,20 @@ img {
 }
 
 .hero-slides .single-hero-slide {
-  position: relative;
+  /* position: relative;
   z-index: 1;
-  height: 670px;
+  height: 670px; */
+  /* 設定高度和最大寬度 */
+  z-index: 1;
+  height: 300px; /* 根據需求調整高度 */
+  background-size: cover; /* 讓背景圖片覆蓋整個區域 */
+  background-position: center; /* 確保圖片居中顯示 */
+}
+
+.hero-slides img {
+  max-width: 100%; /* 限制圖片最大寬度為容器的100% */
+  height: auto; /* 高度自動縮放 */
+  margin: 0 auto; /* 居中 */
 }
 
 @media only screen and (min-width: 992px) and (max-width: 1199px) {

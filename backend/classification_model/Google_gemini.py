@@ -7,15 +7,12 @@ import base64
 from PIL import Image
 import io
 
-
-
 # 設置 API 鍵
 GOOGLE_API_KEY = "AIzaSyCnzKY6McxENFeJDwfrODSXq49GNc9ji_w"
 
 genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
 
 model = genai.GenerativeModel("gemini-1.5-flash")
-
 
 
 # 定義 API URL

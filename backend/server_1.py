@@ -4,6 +4,7 @@ import socket
 import os
 import json
 import base64
+import cgi
 
 def get_local_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -19,7 +20,20 @@ def get_local_ip():
     return ip
 
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
+
     def do_POST(self):
+        # 根據請求路徑進行區分
+        print(self.path)
+        if self.path == r'/post_from_remote':
+            self.handle_from_remote()  # 處理第一個 POST 請求
+        elif self.path == r'/post_from_upload':
+            self.handle_from_upload()  # 處理第二個 POST 請求
+        else:
+            self.send_response(404)
+            self.end_headers()
+            self.wfile.write(b'Invalid path')
+
+    def handle_from_remote(self):
         content_length = int(self.headers['Content-Length'])
         post_data = self.rfile.read(content_length)
 
@@ -39,6 +53,41 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(b'File received successfully')
 
+    def handle_from_upload(self):
+        content_type = self.headers['Content-Type']
+        print("something wrong !", content_type)
+        if 'multipart/form-data' in content_type:
+            form = cgi.FieldStorage(
+                fp=self.rfile,
+                headers=self.headers,
+                environ={'REQUEST_METHOD': 'POST'}
+            )
+
+            # 獲取圖片文件
+            file_field = form['image']  # "image" 是前端表單中附加的字段名稱
+            if file_field.filename:
+                # 取得當前腳本的目錄路徑
+                current_directory = os.path.dirname(os.path.abspath(__file__))
+                save_directory = os.path.join(current_directory, "received_imgs")
+                os.makedirs(save_directory, exist_ok=True)
+                file_path = os.path.join(save_directory, "received_image.jpg")
+
+                # 保存圖片文件
+                with open(file_path, 'wb') as f:
+                    f.write(file_field.file.read())
+
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(b'File received successfully')
+            else:
+                self.send_response(400)
+                self.end_headers()
+                self.wfile.write(b'No file uploaded')
+        else:
+            self.send_response(400)
+            self.end_headers()
+            self.wfile.write(b'Invalid content type')
+
     def do_GET(self):
         # 取得當前腳本的目錄路徑
         current_directory = os.path.dirname(os.path.abspath(__file__))
@@ -52,15 +101,20 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 # 確認資料夾中有文件
                 files = os.listdir(save_directory)
                 if not files:
+                    print("No files found in directory.")
                     raise ValueError("No files found in directory")
 
                 # 找最新的檔案
                 latest_file = max([f for f in os.listdir(save_directory)], key=lambda x: os.path.getmtime(os.path.join(save_directory, x)))
                 latest_file_path = os.path.join(save_directory, latest_file)
 
+                print(f"Latest file: {latest_file_path}")
+
                 # 使用 predict_class 函數取得分類結果
                 class_num, class_name = predict.predict_class(latest_file_path)
 
+                print(f"Prediction: class_num={class_num}, class_name={class_name}")
+                
                 # 讀取並編碼圖片
                 with open(latest_file_path, 'rb') as image_file:
                     encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
@@ -86,6 +140,14 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
                 self.wfile.write(b'No files found')
+
+            except Exception as e:
+                print(f"Unexpected error: {e}")
+                self.send_response(500)
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(b'Server encountered an error')
+
 
         elif self.path == r'/received_image.jpg':
             # 處理圖片的請求
@@ -113,7 +175,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 def run(server_class=HTTPServer, handler_class=SimpleHTTPRequestHandler, port=8080):
     server_address = ('', port)
     ip_address = get_local_ip()
-    print("The server address now is : ",ip_address,port)
+    print("The server address now is : ", ip_address, port)
     httpd = server_class(server_address, handler_class)
     print(f'Starting server on port {port}...')
     httpd.serve_forever()
