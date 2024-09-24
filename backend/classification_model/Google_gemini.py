@@ -1,34 +1,45 @@
-# backend/classification_model/Google_gemini.py
 import os
 import google.generativeai as genai
 import time
+import os
 import requests
 import base64
-from PIL import Image
-import io
+from dotenv import load_dotenv
+load_dotenv()
 
-# 設置 API 鍵
+
+# 將 API 鍵設置為變數
 GOOGLE_API_KEY = "AIzaSyCnzKY6McxENFeJDwfrODSXq49GNc9ji_w"
 
 genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
 
+
 model = genai.GenerativeModel("gemini-1.5-flash")
 
-
-# 定義 API URL
+# 定義圖片所在路徑
+dir_path = r"C:\test\Google_Gemini_API\dataset-resized\trash"
 url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={GOOGLE_API_KEY}"
 
-def classification(image):
-    buffered = io.BytesIO()
-    image.save(buffered, format="JPEG")
-    image_base64_string = base64.b64encode(buffered.getvalue()).decode('utf-8')
 
-    headers = {'Content-Type': 'application/json'}
-    data = {
-        "contents": [
+# 定義分類函數
+def classification(img_path):
+     with open(img_path, "rb") as image_file:
+        image_base64_string = base64.b64encode(image_file.read()).decode('utf-8')
+
+    # 構建請求數據
+        headers = {'Content-Type': 'application/json'}
+        data = {
+            "contents": [
             {
                 "parts": [
-                    {"text": "Which category does this image belong to: glass, metal, paper, cardboard, plastic, or trash?"},
+                    {"text": """ Glass: Items made from glass, including bottles, jars, and containers. These are typically clear, green, or brown and can be recycled to create new glass products.
+                            Metal: Items made from metals such as aluminum, steel, and tin. This includes cans, foil, and certain metal containers. These can be recycled to produce new metal materials.
+                            Paper: Items made from paper, including newspapers, magazines, office paper, and cardboard (if it’s clean and not greasy). Paper products are often recycled into new paper products.
+                            Cardboard:A specific type of paper that is thicker and stronger, typically used for packaging and boxes. Cardboard can be recycled to make new cardboard products or paper products.
+                            Plastic:Items made from plastic, such as bottles, containers, and packaging. Plastics are often labeled with numbers that indicate the type of plastic, and different types are recycled in different ways.
+                            Trash:Items that do not fall into any of the recyclable categories, including food waste, dirty or greasy paper, certain plastics, and mixed materials that cannot be easily separated.Trash is generally sent to landfills or incinerated.
+                            Here are the definitions for the six recycling categories.Which category does this image belong to: glass, metal, paper, cardboard, plastic, or trash ? 
+                            Please directly output one of these categories without any other words, and must choose one closest to definitions.If the image cannot be recognized, it will be classified as trash."""},
                     {
                         "inline_data": {
                             "mime_type": "image/jpeg",
@@ -40,23 +51,29 @@ def classification(image):
         ]
     }
 
-    response = requests.post(url, headers=headers, json=data)
-    if response.status_code == 200:
-        try:
-            result = response.json()
-            answer = result['candidates'][0]['content']['parts'][0]['text'].strip()
-            valid_categories = ['glass', 'metal', 'paper', 'cardboard', 'plastic', 'trash']
-            return answer if answer.lower() in valid_categories else "trash"
-        except KeyError:
-            return "trash"
-    return "trash"
 
-def classify_image_with_retry(image, retries=3, delay=5):
+        response = requests.post(url, headers=headers, json=data)
+        if response.status_code == 200:
+            try:
+                result = response.json()
+
+                answer = result['candidates'][0]['content']['parts'][0]['text'].strip()
+                valid_categories = ['cardboard', 'glass', 'metal', 'paper', 'plastic', 'trash']
+                if answer.lower() in valid_categories:
+                    return answer
+                else:
+                    return "trash"  # 如果答案無效，返回 "trash"
+            except KeyError:
+                return "trash"  # 如果 KeyError，返回 "trash"
+        else:
+            return "trash"  # 如果請求失敗，返回 "trash"
+
+def classification_with_retry(img_path, retries=3, delay=5):
     for attempt in range(retries):
         try:
-            return classification(image) or "trash"
+            return classification(img_path) or "trash"  # 無論如何返回 "trash"
         except requests.ConnectionError:
             if attempt < retries - 1:
                 time.sleep(delay)
             else:
-                return "trash"
+                return "trash"  # 如果所有嘗試失敗，返回 "trash"
