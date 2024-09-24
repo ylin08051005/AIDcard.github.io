@@ -1,5 +1,6 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from classification_model import predict
+from classification_model.Google_gemini import classification_with_retry
 import socket
 import os
 import json
@@ -108,6 +109,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
                 # 使用 predict_class 函數取得分類結果
                 class_num, class_name = predict.predict_class(latest_file_path)
+                google_classification = classification_with_retry(latest_file_path)
 
                 # 讀取並編碼圖片
                 with open(latest_file_path, 'rb') as image_file:
@@ -118,7 +120,8 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                     "file_name": latest_file,
                     "class_name": class_name,
                     "class_num": class_num,
-                    "image_data": encoded_image
+                    "image_data": encoded_image,
+                    "google_classification": google_classification
                 }
 
                 # 將數據轉換為 JSON 並返回
