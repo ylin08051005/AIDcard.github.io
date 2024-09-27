@@ -3,46 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Classification</title>
+    <title>Google Gemini Classification</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
+        }
+    </style>
 </head>
-<body>
-    <h1>Image Classification with Google Gemini</h1>
-    <form id="upload-form" enctype="multipart/form-data">
-        <input type="file" id="file-input" name="file" accept="image/*">
-        <button type="button" onclick="uploadAndClassify()">Upload and Classify</button>
-    </form>
-    <div id="result"></div>
+<body class="bg-gray-100 font-sans">
+    <header class="gradient-bg text-white p-6 shadow-lg">
+        <h1 class="text-3xl font-bold text-center">Google Gemini Classification</h1>
+    </header>
+
+    <main class="container mx-auto mt-8 p-4">
+        <section class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Upload an Image for Prediction</h2>
+            <div class="flex items-center space-x-4">
+                <input type="file" id="uploadImageInput" accept="image/*" class="border p-2 rounded">
+                <button id="uploadButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">Upload Image</button>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-semibold mb-4">Latest Prediction Results</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-xl font-medium mb-2">Uploaded Image:</h3>
+                    <img id="uploadedImage" src="" alt="No image uploaded yet" class="max-w-full h-auto rounded-lg border">
+                </div>
+                <div>
+                    <h3 class="text-xl font-medium mb-2">Classification Result:</h3>
+                    <p id="classificationResult" class="text-lg bg-gray-100 p-4 rounded-lg">Waiting for classification...</p>
+                    <p id="statusMessage" class="mt-4 text-sm text-gray-600">Waiting for upload...</p>
+                </div>
+            </div>
+        </section>
+    </main>
 
     <script>
-        function uploadAndClassify() {
-            const fileInput = document.getElementById('file-input');
+        document.getElementById('uploadButton').addEventListener('click', function() {
+            const fileInput = document.getElementById('uploadImageInput');
             const file = fileInput.files[0];
+
             if (!file) {
-                alert('Please select a file.');
+                document.getElementById('statusMessage').innerText = 'Please select an image';
                 return;
             }
 
             const formData = new FormData();
-            formData.append('file', file);
+            formData.append('image', file);
 
-            fetch('http://localhost:5000/classify_image', {
+            document.getElementById('statusMessage').innerText = 'Uploading...';
+
+            fetch('http://127.0.0.1:8080/post_from_upload', {
                 method: 'POST',
                 body: formData
             })
             .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Upload failed');
                 }
-                return response.json();
             })
             .then(data => {
-                document.getElementById('result').innerText = `Category: ${data.category}`;
+                const imgUrl = "data:image/jpeg;base64," + data.image_data;
+                document.getElementById('uploadedImage').src = imgUrl;
+
+                const classificationText = `Gemini Classification: ${data.classification_with_retry}`;
+                document.getElementById('classificationResult').innerText = classificationText;
+
+                document.getElementById('statusMessage').innerText = 'Image successfully uploaded and classified';
             })
             .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('result').innerText = `Error: ${error.message}`;
+                console.log('Error:', error);
+                document.getElementById('statusMessage').innerText = 'Error: ' + error.message;
             });
+        });
+
+        function checkForNewImage() {
+            document.getElementById('statusMessage').innerText = "Fetching data...";
+
+            fetch('http://127.0.0.1:8080/check-new-image')
+                .then(response => {
+                    if (response.ok) {
+                        console.log('Response received:', response);
+                        document.getElementById('statusMessage').innerText = "Response received";
+                        return response.json();
+                    } else {
+                        throw new Error('Network response was not ok');
+                    }
+                })
+                .then(data => {
+                    const imgUrl = "data:image/jpeg;base64," + data.image_data;
+                    document.getElementById('uploadedImage').src = imgUrl;
+
+                    const classificationText = `Google Gemini Outcome: ${data.google_classification}\nCNN Outcome: ${data.class_name}`;
+                    document.getElementById('classificationResult').innerText = classificationText;
+
+                    document.getElementById('statusMessage').innerText = 'Successfully received new image and classification results';
+                })
+                .catch(error => {
+                    console.log('Error:', error);
+                    document.getElementById('statusMessage').innerText = 'Error: ' + error.message;
+                });
         }
+
+        setInterval(checkForNewImage, 5000);
+        checkForNewImage();
     </script>
 </body>
 </html>
