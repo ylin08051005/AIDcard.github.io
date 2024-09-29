@@ -14,10 +14,6 @@ GOOGLE_API_KEY = "AIzaSyCnzKY6McxENFeJDwfrODSXq49GNc9ji_w"
 genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
 
 
-model = genai.GenerativeModel("gemini-1.5-flash")
-
-# 定義圖片所在路徑
-dir_path = r"C:\test\Google_Gemini_API\dataset-resized\trash"
 url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={GOOGLE_API_KEY}"
 
 
